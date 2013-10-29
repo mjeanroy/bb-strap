@@ -1,0 +1,12 @@
+# -- Ignore Bower Components
+components/
+
+# -- Ignore node modules
+node_modules/
+
+# -- Ignore build directory
+build/
+
+# -- Ignore Intellij Files
+*.iml
+.idea/

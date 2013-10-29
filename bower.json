@@ -1,0 +1,28 @@
+{
+  "name": "backbone-strap",
+  "version": "0.1.0",
+  "authors": [
+    "Mickael Jeanroy <mickael.jeanroy@gmail.com>"
+  ],
+  "description": "Simple Plugin to add utilities to BackboneJS",
+  "main": "src/backbone-strap.js",
+  "keywords": [
+    "jQuery",
+    "Backbone"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "1.10.2",
+    "underscore": "1.5.2",
+    "backbone": "1.1.0",
+    "mustache": "0.7.2"
+  }
+}
