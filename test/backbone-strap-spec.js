@@ -171,6 +171,19 @@ describe("Backbone-Strap Test Suite", function() {
       expect(view.subviews[0]).toBe(subview);
     });
 
+    it("should add subviews", function() {
+      var view = new Backbone.StrapView();
+
+      expect(view.subviews).toEqual([]);
+
+      var subview1 = new Backbone.StrapView();
+      var subview2 = new Backbone.StrapView();
+      view.addSubview([subview1, subview2]);
+      expect(view.subviews.length).toBe(2);
+      expect(view.subviews[0]).toBe(subview1);
+      expect(view.subviews[1]).toBe(subview2);
+    });
+
     it("should close subviews", function() {
       var subview1 = jasmine.createSpyObj('subview1', ['dispose']);
       var subview2 = jasmine.createSpyObj('subview1', ['dispose']);
@@ -268,6 +281,7 @@ describe("Backbone-Strap Test Suite", function() {
         bar: 'bar template'
       };
 
+      view.populate.reset();
       Backbone.templateManager.loads.argsForCall[0][1].call(view, templates);
       expect(view.onLoaded).toHaveBeenCalledWith(templates);
       expect(view.populate).toHaveBeenCalledWith('foo template', fakeData, {

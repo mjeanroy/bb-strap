@@ -425,18 +425,33 @@
     /** Hook to implement, called before view rendering */
     preRender: noop,
 
-    /** Hook that give data used to populate view */
+    /** Alias to hook that give data used to populate view */
     datas: noop,
 
+    /** Hook that give data used to populate view */
+    toJSON: noop,
+
     /** Hook that give partials used to populate view */
-    partials: noop,
+    partials: function(tmpls, mainTemplate) {
+      var results = {};
+
+      _.each(tmpls, function(value, key) {
+        if (key !== mainTemplate) {
+          var id = key.split('/');
+          id = id[id.length - 1];
+          results[id] = value;
+        }
+      });
+
+      return results;
+    },
 
     /** Callback when templates are fully loaded */
     onLoaded: function(tmpl) {
-      var datas = _.result(this, 'datas');
+      var datas = _.result(this, 'toJSON');
 
-      if (_.isUndefined(datas)) {
-        datas = _.result(this, 'toJSON');
+      if (_.isUndefined(datas) || _.isNull(datas)) {
+        datas = _.result(this, 'datas');
       }
 
       if (_.isString(tmpl)) {
@@ -446,7 +461,7 @@
         // Load partials
         var templates = _.result(this, 'templates');
         var mainTemplate = tmpl[templates[0]];
-        this.populate(mainTemplate, datas, this.partials(tmpl));
+        this.populate(mainTemplate, datas, this.partials(tmpl, templates[0]));
       }
     },
 
@@ -549,7 +564,14 @@
       if (!this.subviews) {
         this.subviews = [];
       }
-      this.subviews.push(view);
+
+      if (!_.isArray(view)) {
+        view = [view];
+      }
+
+      _.each(view, function(v) {
+        this.subviews.push(v);
+      }, this);
     },
 
     /** Show loader icon */
@@ -585,10 +607,11 @@
       that.page = options.page || 0;
       that.pageSize = opts.pageSize || 10;
 
-      that.total = opts.total;
-      if (_.isUndefined(that.total)) {
-        that.total = Number.MAX_VALUE;
+      var total = opts.total;
+      if (_.isNull(total) || _.isUndefined(total)) {
+        total = Number.MAX_VALUE;
       }
+      this.total = total;
 
       that.onInit.apply(that, [].slice.call(arguments, 0));
     },
