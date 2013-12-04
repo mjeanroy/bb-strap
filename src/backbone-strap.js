@@ -455,7 +455,8 @@
     render: function() {
       var templates = _.result(this, 'templates');
       if (templates) {
-        this.templateManager.load(templates, this.onLoaded, this);
+        var fn = _.isArray(templates) ? 'loads' : 'load';
+        this.templateManager[fn](templates, this.onLoaded, this);
       }
       return this;
     },
@@ -467,6 +468,7 @@
      * - Close subviews and clear internal cache.
      */
     dispose: function() {
+      var that = this;
       this.onDispose();
       this.clearCache();
       this.closeSubviews();

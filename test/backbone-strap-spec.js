@@ -211,6 +211,7 @@ describe("Backbone-Strap Test Suite", function() {
 
     it("should load several templates and render view", function() {
       spyOn(Backbone.templateManager, 'load').andCallThrough();
+      spyOn(Backbone.templateManager, 'loads').andCallThrough();
       spyOn(Backbone.StrapView.prototype, 'render').andCallThrough();
       spyOn(Backbone.StrapView.prototype, 'onLoaded').andCallThrough();
       spyOn(Backbone.StrapView.prototype, 'populate').andCallThrough();
@@ -235,14 +236,14 @@ describe("Backbone-Strap Test Suite", function() {
       });
 
       expect(view.render).toHaveBeenCalled();
-      expect(Backbone.templateManager.load).toHaveBeenCalledWith(['foo', 'bar'], jasmine.any(Function), view);
+      expect(Backbone.templateManager.loads).toHaveBeenCalledWith(['foo', 'bar'], jasmine.any(Function), view);
 
       var templates = {
         foo: 'foo template',
         bar: 'bar template'
       };
 
-      Backbone.templateManager.load.argsForCall[0][1].call(view, templates);
+      Backbone.templateManager.loads.argsForCall[0][1].call(view, templates);
       expect(view.onLoaded).toHaveBeenCalledWith(templates);
       expect(view.populate).toHaveBeenCalledWith('foo template', fakeData, {
         'bar': 'bar template'
