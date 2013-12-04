@@ -439,11 +439,15 @@
     /** Callback when templates are fully loaded */
     onLoaded: function(tmpl) {
       var datas = _.result(this, 'datas');
+
+      if (_.isUndefined(datas)) {
+        datas = _.result(this, 'toJSON');
+      }
+
       if (_.isString(tmpl)) {
         // Don't need partials
         this.populate(tmpl, datas || {});
-      }
-      else {
+      } else {
         // Load partials
         var templates = _.result(this, 'templates');
         var mainTemplate = tmpl[templates[0]];
@@ -468,7 +472,6 @@
      * - Close subviews and clear internal cache.
      */
     dispose: function() {
-      var that = this;
       this.onDispose();
       this.clearCache();
       this.closeSubviews();

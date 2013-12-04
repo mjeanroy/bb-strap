@@ -184,7 +184,7 @@ describe("Backbone-Strap Test Suite", function() {
       expect(view.subviews).toEqual([]);
     });
 
-    it("should load template and render view", function() {
+    it("should load template and render view using datas function", function() {
       spyOn(Backbone.templateManager, 'load').andCallThrough();
       spyOn(Backbone.StrapView.prototype, 'render').andCallThrough();
       spyOn(Backbone.StrapView.prototype, 'onLoaded').andCallThrough();
@@ -197,6 +197,31 @@ describe("Backbone-Strap Test Suite", function() {
       var view = new Backbone.StrapView({
         templates: 'foo',
         datas: function() {
+          return fakeData;
+        }
+      });
+
+      expect(view.render).toHaveBeenCalled();
+      expect(Backbone.templateManager.load).toHaveBeenCalledWith('foo', jasmine.any(Function), view);
+
+      Backbone.templateManager.load.argsForCall[0][1].call(view, 'foo template');
+      expect(view.onLoaded).toHaveBeenCalledWith('foo template');
+      expect(view.populate).toHaveBeenCalledWith('foo template', fakeData);
+    });
+
+    it("should load template and render view using toJSON function", function() {
+      spyOn(Backbone.templateManager, 'load').andCallThrough();
+      spyOn(Backbone.StrapView.prototype, 'render').andCallThrough();
+      spyOn(Backbone.StrapView.prototype, 'onLoaded').andCallThrough();
+      spyOn(Backbone.StrapView.prototype, 'populate').andCallThrough();
+
+      var fakeData = {
+        id: 1
+      };
+
+      var view = new Backbone.StrapView({
+        templates: 'foo',
+        toJSON: function() {
           return fakeData;
         }
       });
