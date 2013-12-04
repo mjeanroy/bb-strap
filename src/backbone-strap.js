@@ -189,26 +189,28 @@
 
     /** App initialization */
     initialize: function() {
+      var that = this;
+
       // Expose app
-      window.app = this;
+      window.app = that;
 
       // Store $window / $body / url
-      this.$window = $(window);
-      this.$html = $('html');
-      this.$body = $('body');
+      that.$window = $(window);
+      that.$html = $('html');
+      that.$body = $('body');
 
-      this.$html
+      that.$html
         .addClass('js')
         .removeClass('no-js');
 
       var location = window.location;
-      this.url = location.protocol + '//' + location.host + location.pathname;
+      that.url = location.protocol + '//' + location.host + location.pathname;
 
       var args = [].slice.call(arguments, 0);
-      this.preInit.apply(this, args);
-      this.views = this.buildViews();
-      this.router = this.buildRouter();
-      this.onInit.apply(this, args);
+      that.preInit.apply(that, args);
+      that.views = that.buildViews();
+      that.router = that.buildRouter();
+      that.onInit.apply(that, args);
     },
 
     /** Hook initialization (before views and router are built) */
@@ -245,7 +247,8 @@
      * @param {boolean?} trigger If navigation must triggered event to change main view.
      */
     navigate: function(hash, trigger) {
-      if (this.router) {
+      var router = this.router;
+      if (router) {
         if (_.isUndefined(trigger)) {
           trigger = true;
         }
@@ -253,7 +256,7 @@
         // IE7 always add url in href
         hash = hash.replace(this.url, '');
 
-        this.router.navigate(hash, {
+        router.navigate(hash, {
           trigger: trigger
         });
       }
@@ -300,30 +303,32 @@
 
     /** Initialize view. */
     initialize: function(options) {
-      this.templateManager = Backbone.templateManager;
+      var that = this;
+
+      that.templateManager = Backbone.templateManager;
 
       var opts = options || {};
       _.each(opts, function(value, key) {
-        this[key] = value;
-      }, this);
+        that[key] = value;
+      });
 
-      this.$cache = {};
-      this.subviews = [];
+      that.$cache = {};
+      that.subviews = [];
 
-      var args = Array.prototype.slice.call(arguments, 0);
+      var args = [].slice.call(arguments, 0);
       if (!args || !args.length) {
         args = [
           {}
         ];
       }
 
-      this.onInit.apply(this, args);
+      that.onInit.apply(that, args);
 
-      if (this.isEmpty()) {
-        this.postInit.apply(this, args);
+      if (that.isEmpty()) {
+        that.postInit.apply(that, args);
       }
       else {
-        this.onReady.apply(this, args);
+        that.onReady.apply(that, args);
       }
     },
 
@@ -462,11 +467,12 @@
      * - Close subviews and clear internal cache.
      */
     dispose: function() {
-      this.onDispose();
-      this.clearCache();
-      this.closeSubviews();
-      this.stopListening();
-      this.undelegateEvents();
+      var that = this;
+      that.onDispose();
+      that.clearCache();
+      that.closeSubviews();
+      that.stopListening();
+      that.undelegateEvents();
     },
 
     /** Close all subviews of view (i.e. dispose all subviews). */
@@ -509,19 +515,20 @@
      * @param partials
      */
     populate: function(template, datas, partials) {
-      var args = Array.prototype.slice.call(arguments, 0);
-      var html = this.toHtml.apply(this, args);
+      var that = this;
+      var args = [].slice.call(arguments, 0);
+      var html = that.toHtml.apply(that, args);
 
       // Close dom elements before rendering
-      this.closeSubviews();
+      that.closeSubviews();
 
       // Clear cache and call callbacks
-      this.preRender();
-      this.clearCache();
+      that.preRender();
+      that.clearCache();
 
       // Render
-      this.$el.html(html);
-      this.onReady();
+      that.$el.html(html);
+      that.onReady();
     },
 
     /** Generate html */
@@ -574,15 +581,16 @@
     /** Initialize collection */
     initialize: function(models, options) {
       var opts = options || {};
-      this.page = options.page || 0;
-      this.pageSize = opts.pageSize || 10;
+      var that = this;
+      that.page = options.page || 0;
+      that.pageSize = opts.pageSize || 10;
 
-      this.total = opts.total;
-      if (_.isUndefined(this.total)) {
-        this.total = Number.MAX_VALUE;
+      that.total = opts.total;
+      if (_.isUndefined(that.total)) {
+        that.total = Number.MAX_VALUE;
       }
 
-      this.onInit.apply(this, Array.prototype.slice.call(arguments, 0));
+      that.onInit.apply(that, [].slice.call(arguments, 0));
     },
 
     /** Initialization hook */
