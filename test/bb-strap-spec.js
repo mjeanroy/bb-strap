@@ -197,6 +197,20 @@ describe("Backbone-Strap Test Suite", function() {
       expect(view.subviews).toEqual([]);
     });
 
+    it("should not render view if view is not ready to be rendered", function() {
+      spyOn(Backbone.templateManager, 'load');
+      spyOn(Backbone.StrapView.prototype, 'isReady').andReturn(false);
+      spyOn(Backbone.StrapView.prototype, 'render').andCallThrough();
+
+      var view = new Backbone.StrapView({
+        templates: 'foo'
+      });
+
+      expect(view.isReady).toHaveBeenCalled();
+      expect(view.render).toHaveBeenCalled();
+      expect(Backbone.templateManager.load).not.toHaveBeenCalled();
+    });
+
     it("should load template and render view using datas function", function() {
       spyOn(Backbone.templateManager, 'load').andCallThrough();
       spyOn(Backbone.StrapView.prototype, 'render').andCallThrough();

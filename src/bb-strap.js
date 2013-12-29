@@ -395,6 +395,14 @@
       return !$.trim(this.$el.html());
     },
 
+    /**
+     * Check if view is ready to render.
+     * @returns {boolean} True if view is ready to render, false otherwise.
+     */
+    isReady: function() {
+      return true;
+    },
+
     /** Hook to implement for view initialization (view is already rendered) */
     postInit: function() {
       this.render();
@@ -467,10 +475,13 @@
 
     /** Render Function */
     render: function() {
-      var templates = _.result(this, 'templates');
-      if (templates) {
-        var fn = _.isArray(templates) ? 'loads' : 'load';
-        this.templateManager[fn](templates, this.onLoaded, this);
+      var isReady = _.result(this, 'isReady');
+      if (isReady) {
+        var templates = _.result(this, 'templates');
+        if (templates) {
+          var fn = _.isArray(templates) ? 'loads' : 'load';
+          this.templateManager[fn](templates, this.onLoaded, this);
+        }
       }
       return this;
     },
