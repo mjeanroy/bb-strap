@@ -197,6 +197,36 @@ describe("Backbone-Strap Test Suite", function() {
       expect(view.subviews).toEqual([]);
     });
 
+    it("should initialize model from window object value with a default variable name", function() {
+      window.foo = {
+        id: 1,
+        name: 'bar'
+      };
+
+      var view = new Backbone.StrapView();
+      view.foo = new Backbone.Model();
+      view.$read('foo');
+
+      expect(view.foo.get('id')).toBe(1);
+      expect(view.foo.get('name')).toBe('bar');
+      expect(window.foo).toBeUndefined();
+    });
+
+    it("should initialize model from window object value", function() {
+      window.$$foo = {
+        id: 1,
+        name: 'bar'
+      };
+
+      var view = new Backbone.StrapView();
+      view.foo = new Backbone.Model();
+      view.$read('$$foo', 'foo');
+
+      expect(view.foo.get('id')).toBe(1);
+      expect(view.foo.get('name')).toBe('bar');
+      expect(window.$$foo).toBeUndefined();
+    });
+
     it("should not render view if view is not ready to be rendered", function() {
       spyOn(Backbone.templateManager, 'load');
       spyOn(Backbone.StrapView.prototype, 'isReady').andReturn(false);

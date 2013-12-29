@@ -425,6 +425,20 @@
       return $item;
     },
 
+    /**
+     * Read data from window object and set model/collection from its value.
+     * Window object value is automatically destroyed.
+     * @param {string} varName Name of variable on window object.
+     * @param {string?} objName Object name on view, default is name on window object.
+     */
+    $read: function(varName, objName) {
+      if (window[varName]) {
+        var obj = objName || varName;
+        this[obj].set(window[varName]);
+        delete window[varName];
+      }
+    },
+
     /** Clear internal cache. */
     clearCache: function() {
       this.$cache = {};
