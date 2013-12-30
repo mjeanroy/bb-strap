@@ -454,7 +454,7 @@
     toJSON: noop,
 
     /** Hook that give partials used to populate view */
-    partials: function(tmpls, mainTemplate) {
+    $partials: function(tmpls, mainTemplate) {
       var results = {};
 
       _.each(tmpls, function(value, key) {
@@ -466,6 +466,11 @@
       });
 
       return results;
+    },
+
+    /** Hook that give custom partials used to populate view */
+    partials: function(tmpls, mainTemplate) {
+      return {};
     },
 
     /** Callback when templates are fully loaded */
@@ -483,7 +488,9 @@
         // Load partials
         var templates = _.result(this, 'templates');
         var mainTemplate = tmpl[templates[0]];
-        this.populate(mainTemplate, datas, this.partials(tmpl, templates[0]));
+        var partials = this.$partials(tmpl, templates[0]);
+        partials = _.extend(partials, this.partials(tmpl, templates[0]) || {});
+        this.populate(mainTemplate, datas, partials);
       }
     },
 

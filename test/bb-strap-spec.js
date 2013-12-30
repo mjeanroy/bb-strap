@@ -300,6 +300,7 @@ describe("Backbone-Strap Test Suite", function() {
       spyOn(Backbone.StrapView.prototype, 'preRender').andCallThrough();
       spyOn(Backbone.StrapView.prototype, 'clearCache').andCallThrough();
       spyOn(Backbone.StrapView.prototype, 'closeSubviews').andCallThrough();
+      spyOn(Backbone.StrapView.prototype, '$partials').andCallThrough();
 
       var fakeData = {
         id: 1
@@ -328,6 +329,7 @@ describe("Backbone-Strap Test Suite", function() {
       view.populate.reset();
       Backbone.templateManager.loads.argsForCall[0][1].call(view, templates);
       expect(view.onLoaded).toHaveBeenCalledWith(templates);
+      expect(view.$partials).toHaveBeenCalledWith({ foo: 'foo template', bar: 'bar template' }, 'foo');
       expect(view.populate).toHaveBeenCalledWith('foo template', fakeData, {
         'bar': 'bar template'
       });
