@@ -617,6 +617,37 @@
       }, this);
     },
 
+    /**
+     * Read subview from html and append it to subviews array.
+     * @param {*} $el Subview selector.
+     * @param {*} ViewClass Subview class.
+     * @param {*=} params View initialization parameters (function or object).
+     */
+    $addSubview: function($el, ViewClass, params) {
+      var that = this;
+
+      if (!($el instanceof Backbone.$)) {
+        $el = that.$c($el);
+      }
+
+      if (_.isNull(params) || _.isUndefined(params)) {
+        params = {};
+      }
+
+      var fn = params;
+      if (!_.isFunction(fn)) {
+        fn = function() { return params; };
+      }
+
+      $el.each(function(idx, $current) {
+        var options = _.extend(fn.call(that, idx, $current), {
+          el: $current
+        });
+
+        that.addSubview(new ViewClass(options));
+      });
+    },
+
     /** Show loader icon */
     showLoader: function() {
       if (!this.$loader) {

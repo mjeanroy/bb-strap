@@ -197,6 +197,84 @@ describe("Backbone-Strap Test Suite", function() {
       expect(view.subviews).toEqual([]);
     });
 
+    it("should add subview from dom", function() {
+      var $el1 = $('<div></div>').addClass('subview');
+      var $el2 = $('<div></div>').addClass('subview');
+      var $el = $('<div></div>').append($el1).append($el2);
+
+      var view = new Backbone.StrapView({
+        el: $el
+      });
+
+      expect(view.subviews).toEqual([]);
+
+      var subview = new Backbone.StrapView();
+      view.$addSubview('.subview', Backbone.StrapView, {
+        foo: 'bar'
+      });
+      expect(view.subviews.length).toBe(2);
+
+      expect(view.subviews[0].foo).toBe('bar');
+      expect(view.subviews[0].$el).toBeDefined();
+      expect(view.subviews[0].$el.length).toBe(1);
+
+      expect(view.subviews[1].foo).toBe('bar');
+      expect(view.subviews[1].$el).toBeDefined();
+      expect(view.subviews[1].$el.length).toBe(1);
+    });
+
+    it("should add subview from dom and execute parameter function", function() {
+      var $el1 = $('<div></div>').addClass('subview');
+      var $el2 = $('<div></div>').addClass('subview');
+      var $el = $('<div></div>').append($el1).append($el2);
+
+      var view = new Backbone.StrapView({
+        el: $el
+      });
+
+      expect(view.subviews).toEqual([]);
+
+      var fn = jasmine.createSpy('fn').andReturn({
+        foo: 'bar'
+      });
+
+      var subview = new Backbone.StrapView();
+      view.$addSubview('.subview', Backbone.StrapView, fn);
+      expect(view.subviews.length).toBe(2);
+      expect(fn).toHaveBeenCalledWith(0, jasmine.any(Object));
+      expect(fn).toHaveBeenCalledWith(1, jasmine.any(Object));
+
+      expect(view.subviews[0].foo).toBe('bar');
+      expect(view.subviews[0].$el).toBeDefined();
+      expect(view.subviews[0].$el.length).toBe(1);
+
+      expect(view.subviews[1].foo).toBe('bar');
+      expect(view.subviews[1].$el).toBeDefined();
+      expect(view.subviews[1].$el.length).toBe(1);
+    });
+
+    it("should add subview from dom without parameters", function() {
+      var $el1 = $('<div></div>').addClass('subview');
+      var $el2 = $('<div></div>').addClass('subview');
+      var $el = $('<div></div>').append($el1).append($el2);
+
+      var view = new Backbone.StrapView({
+        el: $el
+      });
+
+      expect(view.subviews).toEqual([]);
+
+      var subview = new Backbone.StrapView();
+      view.$addSubview('.subview', Backbone.StrapView);
+      expect(view.subviews.length).toBe(2);
+
+      expect(view.subviews[0].$el).toBeDefined();
+      expect(view.subviews[0].$el.length).toBe(1);
+
+      expect(view.subviews[1].$el).toBeDefined();
+      expect(view.subviews[1].$el.length).toBe(1);
+    });
+
     it("should initialize model from window object value with a default variable name", function() {
       window.foo = {
         id: 1,
