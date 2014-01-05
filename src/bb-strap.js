@@ -439,6 +439,17 @@
       }
     },
 
+    /**
+     * Read data from window object and set model/collection from its value.
+     * Window object value is automatically destroyed.
+     * Window value is expected to be equal to '$$[varName]' and model/collection name
+     * is expected to be [varName].
+     * @param {string} varName Name of variable.
+     */
+    $$read: function(varName) {
+      this.$read('$$' + varName, varName);
+    },
+
     /** Clear internal cache. */
     clearCache: function() {
       this.$cache = {};
