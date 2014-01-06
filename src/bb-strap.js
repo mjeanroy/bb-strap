@@ -608,13 +608,16 @@
         this.subviews = [];
       }
 
-      if (!_.isArray(view)) {
-        view = [view];
+      var array = view;
+      if (!_.isArray(array)) {
+        array = [array];
       }
 
-      _.each(view, function(v) {
+      _.each(array, function(v) {
         this.subviews.push(v);
       }, this);
+
+      return view;
     },
 
     /**
@@ -639,13 +642,16 @@
         fn = function() { return params; };
       }
 
+      var added = [];
       $el.each(function(idx, $current) {
         var options = _.extend(fn.call(that, idx, $current), {
           el: $current
         });
 
-        that.addSubview(new ViewClass(options));
+        added.push(that.addSubview(new ViewClass(options)));
       });
+
+      return added;
     },
 
     /** Show loader icon */

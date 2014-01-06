@@ -166,9 +166,10 @@ describe("Backbone-Strap Test Suite", function() {
       expect(view.subviews).toEqual([]);
 
       var subview = new Backbone.StrapView();
-      view.addSubview(subview);
+      var added = view.addSubview(subview);
       expect(view.subviews.length).toBe(1);
       expect(view.subviews[0]).toBe(subview);
+      expect(added).toBe(subview);
     });
 
     it("should add subviews", function() {
@@ -178,10 +179,13 @@ describe("Backbone-Strap Test Suite", function() {
 
       var subview1 = new Backbone.StrapView();
       var subview2 = new Backbone.StrapView();
-      view.addSubview([subview1, subview2]);
+      var added = view.addSubview([subview1, subview2]);
       expect(view.subviews.length).toBe(2);
       expect(view.subviews[0]).toBe(subview1);
       expect(view.subviews[1]).toBe(subview2);
+      expect(added.length).toBe(2);
+      expect(added[0]).toBe(subview1);
+      expect(added[1]).toBe(subview2);
     });
 
     it("should close subviews", function() {
@@ -208,10 +212,13 @@ describe("Backbone-Strap Test Suite", function() {
 
       expect(view.subviews).toEqual([]);
 
-      var subview = new Backbone.StrapView();
-      view.$addSubview('.subview', Backbone.StrapView, {
+      var added = view.$addSubview('.subview', Backbone.StrapView, {
         foo: 'bar'
       });
+      expect(added).toBeDefined();
+      expect(added.length).toBe(2);
+      expect(added[0] instanceof Backbone.StrapView).toBe(true);
+      expect(added[1] instanceof Backbone.StrapView).toBe(true);
       expect(view.subviews.length).toBe(2);
 
       expect(view.subviews[0].foo).toBe('bar');
@@ -221,6 +228,31 @@ describe("Backbone-Strap Test Suite", function() {
       expect(view.subviews[1].foo).toBe('bar');
       expect(view.subviews[1].$el).toBeDefined();
       expect(view.subviews[1].$el.length).toBe(1);
+    });
+
+    it("should add one subview from dom", function() {
+      var $el1 = $('<div></div>').addClass('subview');
+      var $el = $('<div></div>').append($el1);
+
+      var view = new Backbone.StrapView({
+        el: $el
+      });
+
+      expect(view.subviews).toEqual([]);
+
+      var added = view.$addSubview('.subview', Backbone.StrapView, {
+        foo: 'bar'
+      });
+
+      expect(added).toBeDefined();
+      expect(added.length).toBe(1);
+      expect(added[0] instanceof Backbone.StrapView).toBe(true);
+      expect(view.subviews.length).toBe(1);
+
+      expect(view.subviews[0].foo).toBe('bar');
+      expect(view.subviews[0].$el).toBeDefined();
+      expect(view.subviews[0].$el.length).toBe(1);
+      expect(view.subviews[0]).toBe(added[0]);
     });
 
     it("should add subview from dom and execute parameter function", function() {
@@ -238,7 +270,6 @@ describe("Backbone-Strap Test Suite", function() {
         foo: 'bar'
       });
 
-      var subview = new Backbone.StrapView();
       view.$addSubview('.subview', Backbone.StrapView, fn);
       expect(view.subviews.length).toBe(2);
       expect(fn).toHaveBeenCalledWith(0, jasmine.any(Object));
@@ -264,7 +295,6 @@ describe("Backbone-Strap Test Suite", function() {
 
       expect(view.subviews).toEqual([]);
 
-      var subview = new Backbone.StrapView();
       view.$addSubview('.subview', Backbone.StrapView);
       expect(view.subviews.length).toBe(2);
 
