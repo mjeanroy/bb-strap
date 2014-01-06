@@ -305,6 +305,87 @@ describe("Backbone-Strap Test Suite", function() {
       expect(view.subviews[1].$el.length).toBe(1);
     });
 
+    it("should should show loader using default css", function() {
+      var $el = $('<div></div>');
+
+      var view = new Backbone.StrapView({
+        el: $el
+      });
+
+      view.showLoader();
+
+      expect(view.$el.hasClass('loading')).toBe(true);
+
+      var $i = view.$el.find('i');
+      expect($i.length).toBe(1);
+      expect($i.hasClass('icon-loader')).toBe(true);
+    });
+
+    it("should should show loader using custom css", function() {
+      var $el = $('<div></div>');
+
+      var view = new Backbone.StrapView({
+        el: $el,
+        elLoader: 'foo',
+        iconLoader: 'bar'
+      });
+
+      view.showLoader();
+
+      expect(view.$loading).toBe(true);
+      expect(view.$el.hasClass('foo')).toBe(true);
+      expect(view.$el.hasClass('loading')).toBe(false);
+
+      var $i = view.$el.find('i');
+      expect($i.length).toBe(1);
+      expect($i.hasClass('bar')).toBe(true);
+      expect($i.hasClass('icon-loader')).toBe(false);
+      expect(view.$loader).toBeDefined();
+    });
+
+    it("should should remove loader", function() {
+      var $el = $('<div></div>');
+
+      var view = new Backbone.StrapView({
+        el: $el
+      });
+
+      view.$el.addClass('loading');
+      view.$loader = $('<i></i>');
+      view.$loading = true;
+      view.hideLoader();
+
+      expect(view.$loading).toBe(false);
+      expect(view.$el.hasClass('loading')).toBe(false);
+      var $i = view.$el.find('i');
+      expect($i.length).toBe(0);
+      expect(view.$loader).toBe(null);
+    });
+
+    it("should should remove loader when view render", function() {
+      var $el = $('<div></div>');
+
+      spyOn(Backbone.templateManager, 'load').andCallFake(function(template, fn, context) {
+        fn.call(context, template);
+      });
+
+      var view = new Backbone.StrapView({
+        el: $el,
+        templates: 'foo'
+      });
+
+      view.$el.addClass('loading');
+      view.$loader = $('<i></i>');
+      view.$loading = true;
+      view.render();
+
+      expect(view.$loading).toBe(false);
+      expect(view.$el.hasClass('loading')).toBe(false);
+      var $i = view.$el.find('i');
+      expect($i.length).toBe(0);
+      expect(view.$loader).toBe(null);
+    });
+
     it("should initialize model from window object value with a default variable name", function() {
       window.foo = {
         id: 1,

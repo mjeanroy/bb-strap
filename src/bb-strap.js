@@ -585,6 +585,7 @@
       that.clearCache();
 
       // Render
+      that.hideLoader();
       that.$el.html(html);
       that.onReady();
     },
@@ -654,19 +655,35 @@
       return added;
     },
 
+    /** Css class appended to el element when loader is visible. */
+    elLoader: 'loading',
+
+    /** Css class set to loader icon. */
+    iconLoader: 'icon-loader',
+
     /** Show loader icon */
     showLoader: function() {
-      if (!this.$loader) {
-        this.$loader = $('<i class="loader"></i>');
-        this.$el.html(this.$loader);
+      var that = this;
+      var $i = that.$loader;
+      var iconLoader = _.result(that, 'iconLoader');
+      var loadingClass = _.result(that, 'elLoader');
+      if (!$i && iconLoader) {
+        that.$loading = true;
+        $i = $('<i></i>').addClass(iconLoader);
+        that.$el.addClass(loadingClass).append($i);
+        that.$loader = $i;
       }
     },
 
     /** Hide loader icon */
     hideLoader: function() {
-      if (this.$loader) {
-        this.$loader.remove();
-        this.$loader = null;
+      var that = this;
+      if (that.$loader) {
+        that.$loading = false;
+        var loadingClass = _.result(that, 'elLoader');
+        that.$el.removeClass(loadingClass);
+        that.$loader.remove();
+        that.$loader = null;
       }
     }
   });
