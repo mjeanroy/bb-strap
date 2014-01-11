@@ -115,6 +115,11 @@
     /** Channels */
     channels: {},
 
+    /** Clear all subscriptions. */
+    clear: function() {
+      Backbone.Mediator.channels = {};
+    },
+
     /** Subscribe to a channel */
     subscribe: function(channel, subscription, context, once) {
       var channels = Backbone.Mediator.channels;
@@ -152,6 +157,11 @@
 
     /** Cancel subscriptions */
     unsubscribe: function(channel, fn, context) {
+      if (arguments.length === 0) {
+        Backbone.Mediator.clear();
+        return;
+      }
+
       var channels = Backbone.Mediator.channels;
 
       if (!channels[channel]) {

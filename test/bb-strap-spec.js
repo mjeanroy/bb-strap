@@ -594,6 +594,20 @@ describe("Backbone-Strap Test Suite", function() {
       ]);
     });
 
+    it("should clear subscriptions", function() {
+      Backbone.Mediator.channels['foo'] = [
+        {
+          fn: jasmine.any(Function),
+          context: jasmine.any(Function),
+          once: false
+        }
+      ];
+
+      Backbone.Mediator.clear();
+
+      expect(Backbone.Mediator.channels).toEqual({});
+    });
+
     it("should subscribe twice to a new channel", function() {
       var fn1 = jasmine.createSpy('fn1');
       Backbone.Mediator.subscribe("foo", fn1, fn1);
@@ -620,6 +634,20 @@ describe("Backbone-Strap Test Suite", function() {
 
       Backbone.Mediator.unsubscribe('foo');
       expect(Backbone.Mediator.channels['foo']).toEqual([]);
+    });
+
+    it("should unsubscribe everything if no argument is given", function() {
+      var fn1 = jasmine.createSpy('fn1');
+      Backbone.Mediator.channels['foo'] = [
+        {
+          fn: fn1,
+          context: fn1,
+          once: false
+        }
+      ];
+
+      Backbone.Mediator.unsubscribe();
+      expect(Backbone.Mediator.channels).toEqual({});
     });
 
     it("should unsubscribe a function of channel", function() {
