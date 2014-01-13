@@ -867,6 +867,13 @@ describe("Backbone-Strap Test Suite", function() {
       this.success = jasmine.createSpy('success');
     });
 
+    it("should initialize collection without options", function() {
+      var collection = new Backbone.PaginatedCollection([]);
+      expect(collection.total).toBe(Number.MAX_VALUE);
+      expect(collection.page).toBe(0);
+      expect(collection.pageSize).toBe(10);
+    });
+
     it("should initialize collection with defaults page, pageSize and total", function() {
       var collection = new Backbone.PaginatedCollection([], {
         total: 20

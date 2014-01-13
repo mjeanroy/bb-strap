@@ -711,7 +711,7 @@
     initialize: function(models, options) {
       var opts = options || {};
       var that = this;
-      that.page = options.page || 0;
+      that.page = opts.page || 0;
       that.pageSize = opts.pageSize || 10;
 
       var total = opts.total;
