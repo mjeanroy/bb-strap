@@ -558,7 +558,9 @@
       for (var key in that) {
         if (that.hasOwnProperty(key) && !exclude[key]) {
           var value = that[key];
+
           if (value instanceof Backbone.StrapView) {
+            // Should not happen...
             value.close();
           }
 
@@ -571,12 +573,24 @@
 
     /** Close all subviews of view (i.e. dispose all subviews). */
     closeSubviews: function() {
-      _.each(this.subviews, function(subview) {
+      var that = this;
+
+      _.each(that.subviews, function(subview) {
         if (subview.dispose) {
           subview.dispose();
         }
       });
-      this.subviews = [];
+
+      // Close subviews not previously stored in subviews array
+      for (var i in that) {
+        var value = that[i];
+        if (that.hasOwnProperty(i) && value instanceof Backbone.StrapView) {
+          value.close();
+          that[i] = null;
+        }
+      }
+
+      that.subviews = [];
     },
 
     /** Hook to implement when view is disposed */
