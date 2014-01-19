@@ -150,6 +150,7 @@ describe("Backbone-Strap Test Suite", function() {
       spyOn(view, 'closeSubviews').andCallThrough();
       spyOn(view, 'stopListening').andCallThrough();
       spyOn(view, 'undelegateEvents').andCallThrough();
+      spyOn(view, 'destroy').andCallThrough();
 
       view.dispose();
       expect(view.$cache).toEqual({});
@@ -158,6 +159,21 @@ describe("Backbone-Strap Test Suite", function() {
       expect(view.closeSubviews).toHaveBeenCalled();
       expect(view.stopListening).toHaveBeenCalled();
       expect(view.undelegateEvents).toHaveBeenCalled();
+      expect(view.destroy).not.toHaveBeenCalled();
+    });
+
+    it("should destroy internal data and close internal view", function() {
+      var subview = new Backbone.StrapView();
+      spyOn(subview, 'close');
+
+      var view = new Backbone.StrapView();
+      view.foo = 'bar';
+      view.sub = subview;
+
+      view.destroy();
+      expect(view.foo).toBe(null);
+      expect(view.sub).toBe(null);
+      expect(subview.close).toHaveBeenCalled();
     });
 
     it("should add subview", function() {

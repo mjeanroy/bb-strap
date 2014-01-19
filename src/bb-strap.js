@@ -543,6 +543,23 @@
       that.undelegateEvents();
     },
 
+    /** Destroy view internal data. */
+    destroy: function() {
+      var that = this;
+      for (var key in that) {
+        if (that.hasOwnProperty(key)) {
+          var value = that[key];
+          if (value instanceof Backbone.StrapView) {
+            value.close();
+          }
+
+          that[key] = null;
+        }
+      }
+
+      return that;
+    },
+
     /** Close all subviews of view (i.e. dispose all subviews). */
     closeSubviews: function() {
       _.each(this.subviews, function(subview) {
@@ -560,20 +577,24 @@
      * Close view:
      * - Dispose view events.
      * - Remove el from DOM.
+     * - Destroy internal data.
      */
     close: function() {
       this.dispose();
       this.remove();
+      this.destroy();
     },
 
     /**
      * Clear view:
      * - Dispose view events.
      * - Empty el element (does not remove el but clear content).
+     * - Destroy internal data.
      */
     clear: function() {
       this.dispose();
       this.$el.empty();
+      this.destroy();
     },
 
     /**
