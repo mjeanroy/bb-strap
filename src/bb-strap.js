@@ -546,8 +546,17 @@
     /** Destroy view internal data. */
     destroy: function() {
       var that = this;
+
+      var exclude = {
+        $cache: true,
+        subviews: true,
+        cid: true,
+        $el: true,
+        el: true
+      };
+
       for (var key in that) {
-        if (that.hasOwnProperty(key)) {
+        if (that.hasOwnProperty(key) && !exclude[key]) {
           var value = that[key];
           if (value instanceof Backbone.StrapView) {
             value.close();

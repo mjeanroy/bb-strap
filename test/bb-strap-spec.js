@@ -173,6 +173,8 @@ describe("Backbone-Strap Test Suite", function() {
       view.destroy();
       expect(view.foo).toBe(null);
       expect(view.sub).toBe(null);
+      expect(view.subviews).toEqual([]);
+      expect(view.$cache).toEqual({});
       expect(subview.close).toHaveBeenCalled();
     });
 
