@@ -576,6 +576,7 @@
       var that = this;
 
       _.each(that.subviews, function(subview) {
+        that.stopListening(subview);
         if (subview.dispose) {
           subview.dispose();
         }
@@ -688,6 +689,7 @@
      * @param view Subview.
      */
     removeSubview: function(view) {
+      this.stopListening(view);
       var cid = view.cid;
       delete this.subviews[cid];
     },

@@ -256,6 +256,8 @@ describe("Backbone-Strap Test Suite", function() {
       var view = new Backbone.StrapView();
       var subview = new Backbone.StrapView();
 
+      spyOn(view, 'stopListening');
+
       var cid = subview.cid;
       view.subviews[cid] = subview;
 
@@ -263,6 +265,7 @@ describe("Backbone-Strap Test Suite", function() {
       view.removeSubview(subview);
 
       // THEN
+      expect(view.stopListening).toHaveBeenCalledWith(subview);
       expect(view.subviews[cid]).toBeUndefined();
       expect(view.subviews).toEqual({});
     });
@@ -343,10 +346,14 @@ describe("Backbone-Strap Test Suite", function() {
         bar: subview2
       };
 
+      spyOn(view, 'stopListening');
+
       // WHEN
       view.closeSubviews();
 
       // THEN
+      expect(view.stopListening).toHaveBeenCalledWith(subview1);
+      expect(view.stopListening).toHaveBeenCalledWith(subview2);
       expect(subview1.dispose).toHaveBeenCalled();
       expect(subview2.dispose).toHaveBeenCalled();
       expect(view.subviews).toEqual({});
