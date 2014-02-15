@@ -229,6 +229,9 @@ describe("Backbone-Strap Test Suite", function() {
     it("should add subview", function() {
       // GIVEN
       var view = new Backbone.StrapView();
+      spyOn(view, 'listenToOnce').andCallThrough();
+      spyOn(view, 'removeSubview').andCallThrough();
+
       var subview = new Backbone.StrapView();
 
       // WHEN
@@ -239,6 +242,12 @@ describe("Backbone-Strap Test Suite", function() {
       expect(view.subviews).not.toEqual({});
       expect(view.subviews[cid]).toBe(subview);
       expect(added).toBe(subview);
+
+      expect(view.listenToOnce).toHaveBeenCalledWith(subview, 'close', view.removeSubview);
+
+      subview.close();
+      expect(view.removeSubview).toHaveBeenCalled();
+      expect(view.subviews[cid]).toBe(null);
     });
 
     it("should remove subview", function() {

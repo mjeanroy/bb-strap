@@ -604,10 +604,10 @@
      */
     close: function() {
       var that = this;
+      that.trigger('close', this);
       that.dispose();
       that.remove();
       that.destroy();
-      that.trigger('close', this);
     },
 
     /**
@@ -618,10 +618,10 @@
      */
     clear: function() {
       var that = this;
+      that.trigger('clear', this);
       that.dispose();
       that.$el.empty();
       that.destroy();
-      that.trigger('clear', this);
     },
 
     /**
@@ -675,6 +675,9 @@
       _.each(array, function(v) {
         var cid = v.cid;
         this.subviews[cid] = v;
+
+        // Remove automatically when subview is closed
+        this.listenToOnce(v, 'close', this.removeSubview);
       }, this);
 
       return view;
