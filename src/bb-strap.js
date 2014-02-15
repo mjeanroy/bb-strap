@@ -689,7 +689,7 @@
      */
     removeSubview: function(view) {
       var cid = view.cid;
-      this.subviews[cid] = null;
+      delete this.subviews[cid];
     },
 
     /**

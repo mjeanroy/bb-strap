@@ -247,7 +247,8 @@ describe("Backbone-Strap Test Suite", function() {
 
       subview.close();
       expect(view.removeSubview).toHaveBeenCalled();
-      expect(view.subviews[cid]).toBe(null);
+      expect(view.subviews[cid]).toBeUndefined();
+      expect(view.subviews).toEqual({});
     });
 
     it("should remove subview", function() {
@@ -262,7 +263,8 @@ describe("Backbone-Strap Test Suite", function() {
       view.removeSubview(subview);
 
       // THEN
-      expect(view.subviews[cid]).toBe(null);
+      expect(view.subviews[cid]).toBeUndefined();
+      expect(view.subviews).toEqual({});
     });
 
     it("should add subviews", function() {
