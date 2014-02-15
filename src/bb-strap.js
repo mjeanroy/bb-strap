@@ -603,9 +603,11 @@
      * - Destroy internal data.
      */
     close: function() {
-      this.dispose();
-      this.remove();
-      this.destroy();
+      var that = this;
+      that.dispose();
+      that.remove();
+      that.destroy();
+      that.trigger('close', this);
     },
 
     /**
@@ -615,9 +617,11 @@
      * - Destroy internal data.
      */
     clear: function() {
-      this.dispose();
-      this.$el.empty();
-      this.destroy();
+      var that = this;
+      that.dispose();
+      that.$el.empty();
+      that.destroy();
+      that.trigger('clear', this);
     },
 
     /**
