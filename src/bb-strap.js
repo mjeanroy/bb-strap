@@ -323,7 +323,7 @@
       });
 
       that.$cache = {};
-      that.subviews = [];
+      that.subviews = {};
 
       var args = [].slice.call(arguments, 0);
       if (!args || !args.length) {
@@ -590,7 +590,7 @@
         }
       }
 
-      that.subviews = [];
+      that.subviews = {};
     },
 
     /** Hook to implement when view is disposed */
@@ -664,7 +664,7 @@
      */
     addSubview: function(view) {
       if (!this.subviews) {
-        this.subviews = [];
+        this.subviews = {};
       }
 
       var array = view;
@@ -673,14 +673,24 @@
       }
 
       _.each(array, function(v) {
-        this.subviews.push(v);
+        var cid = v.cid;
+        this.subviews[cid] = v;
       }, this);
 
       return view;
     },
 
     /**
-     * Read subview from html and append it to subviews array.
+     * Remove view from subviews object.
+     * @param view Subview.
+     */
+    removeSubview: function(view) {
+      var cid = view.cid;
+      this.subviews[cid] = null;
+    },
+
+    /**
+     * Read subview from html and append it to subviews objects.
      * @param {*} $el Subview selector.
      * @param {*} ViewClass Subview class.
      * @param {*=} params View initialization parameters (function or object).
