@@ -241,6 +241,21 @@ describe("Backbone-Strap Test Suite", function() {
       expect(added).toBe(subview);
     });
 
+    it("should remove subview", function() {
+      // GIVEN
+      var view = new Backbone.StrapView();
+      var subview = new Backbone.StrapView();
+
+      var cid = subview.cid;
+      view.subviews[cid] = subview;
+
+      // WHEN
+      view.removeSubview(subview);
+
+      // THEN
+      expect(view.subviews[cid]).toBe(null);
+    });
+
     it("should add subviews", function() {
       // GIVEN
       var view = new Backbone.StrapView();
