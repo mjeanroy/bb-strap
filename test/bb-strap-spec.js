@@ -606,7 +606,7 @@ describe("Backbone-Strap Test Suite", function() {
       // THEN
       expect(view.foo).toBe('bar');
       expect(view.$cache).toEqual({});
-      expect(view.subviews).toEqual({});
+      expect(view.$subviews).toEqual({});
       expect(view.templateManager).toBe(Backbone.templateManager);
     });
 
@@ -624,7 +624,7 @@ describe("Backbone-Strap Test Suite", function() {
 
       // THEN
       expect(view.$cache).toEqual({});
-      expect(view.subviews).toEqual({});
+      expect(view.$subviews).toEqual({});
 
       expect(view.initialize).toHaveBeenCalled();
       expect(view.onInit).toHaveBeenCalled();
@@ -648,7 +648,7 @@ describe("Backbone-Strap Test Suite", function() {
 
       // THEN
       expect(view.$cache).toEqual({});
-      expect(view.subviews).toEqual({});
+      expect(view.$subviews).toEqual({});
 
       expect(view.initialize).toHaveBeenCalled();
       expect(view.onInit).toHaveBeenCalled();
@@ -757,7 +757,7 @@ describe("Backbone-Strap Test Suite", function() {
       expect(result).toBe(view);
       expect(view.foo).toBe(null);
       expect(view.sub).toBe(null);
-      expect(view.subviews).toEqual({});
+      expect(view.$subviews).toEqual({});
       expect(view.$cache).toEqual({});
       expect(subview.close).toHaveBeenCalled();
     });
@@ -775,16 +775,16 @@ describe("Backbone-Strap Test Suite", function() {
 
       // THEN
       var cid = subview.cid;
-      expect(view.subviews).not.toEqual({});
-      expect(view.subviews[cid]).toBe(subview);
+      expect(view.$subviews).not.toEqual({});
+      expect(view.$subviews[cid]).toBe(subview);
       expect(added).toBe(subview);
 
       expect(view.listenToOnce).toHaveBeenCalledWith(subview, 'close', view.removeSubview);
 
       subview.close();
       expect(view.removeSubview).toHaveBeenCalled();
-      expect(view.subviews[cid]).toBeUndefined();
-      expect(view.subviews).toEqual({});
+      expect(view.$subviews[cid]).toBeUndefined();
+      expect(view.$subviews).toEqual({});
     });
 
     it("should remove subview", function() {
@@ -795,7 +795,7 @@ describe("Backbone-Strap Test Suite", function() {
       spyOn(view, 'stopListening');
 
       var cid = subview.cid;
-      view.subviews[cid] = subview;
+      view.$subviews[cid] = subview;
 
       // WHEN
       var result = view.removeSubview(subview);
@@ -803,8 +803,8 @@ describe("Backbone-Strap Test Suite", function() {
       // THEN
       expect(result).toBe(view);
       expect(view.stopListening).toHaveBeenCalledWith(subview);
-      expect(view.subviews[cid]).toBeUndefined();
-      expect(view.subviews).toEqual({});
+      expect(view.$subviews[cid]).toBeUndefined();
+      expect(view.$subviews).toEqual({});
     });
 
     it("should add subviews", function() {
@@ -819,9 +819,9 @@ describe("Backbone-Strap Test Suite", function() {
       // THEN
       var cid1 = subview1.cid;
       var cid2 = subview2.cid;
-      expect(view.subviews).not.toEqual({});
-      expect(view.subviews[cid1]).toBe(subview1);
-      expect(view.subviews[cid2]).toBe(subview2);
+      expect(view.$subviews).not.toEqual({});
+      expect(view.$subviews[cid1]).toBe(subview1);
+      expect(view.$subviews[cid2]).toBe(subview2);
       expect(added.length).toBe(2);
       expect(added[0]).toBe(subview1);
       expect(added[1]).toBe(subview2);
@@ -837,7 +837,7 @@ describe("Backbone-Strap Test Suite", function() {
         el: $el
       });
 
-      expect(view.subviews).toEqual({});
+      expect(view.$subviews).toEqual({});
 
       // WHEN
       var added = view.$addSubview('.subview', Backbone.StrapView, {
@@ -849,20 +849,20 @@ describe("Backbone-Strap Test Suite", function() {
       expect(added.length).toBe(2);
       expect(added[0] instanceof Backbone.StrapView).toBe(true);
       expect(added[1] instanceof Backbone.StrapView).toBe(true);
-      expect(view.subviews).not.toEqual({});
+      expect(view.$subviews).not.toEqual({});
 
-      var cids = _.keys(view.subviews);
+      var cids = _.keys(view.$subviews);
       expect(cids.length).toBe(2);
 
       var cid1 = cids[0];
       var cid2 = cids[1];
-      expect(view.subviews[cid1].foo).toBe('bar');
-      expect(view.subviews[cid1].$el).toBeDefined();
-      expect(view.subviews[cid1].$el.length).toBe(1);
+      expect(view.$subviews[cid1].foo).toBe('bar');
+      expect(view.$subviews[cid1].$el).toBeDefined();
+      expect(view.$subviews[cid1].$el.length).toBe(1);
 
-      expect(view.subviews[cid2].foo).toBe('bar');
-      expect(view.subviews[cid2].$el).toBeDefined();
-      expect(view.subviews[cid2].$el.length).toBe(1);
+      expect(view.$subviews[cid2].foo).toBe('bar');
+      expect(view.$subviews[cid2].$el).toBeDefined();
+      expect(view.$subviews[cid2].$el.length).toBe(1);
     });
 
     it("should add one subview from dom", function() {
@@ -882,16 +882,16 @@ describe("Backbone-Strap Test Suite", function() {
       // THEN
       expect(added).toBeDefined();
       expect(added instanceof Backbone.StrapView).toBe(true);
-      expect(view.subviews).not.toEqual({});
+      expect(view.$subviews).not.toEqual({});
 
-      var keys = _.keys(view.subviews);
+      var keys = _.keys(view.$subviews);
       expect(keys.length).toBe(1);
 
       var cid = keys[0];
-      expect(view.subviews[cid].foo).toBe('bar');
-      expect(view.subviews[cid].$el).toBeDefined();
-      expect(view.subviews[cid].$el.length).toBe(1);
-      expect(view.subviews[cid]).toBe(added);
+      expect(view.$subviews[cid].foo).toBe('bar');
+      expect(view.$subviews[cid].$el).toBeDefined();
+      expect(view.$subviews[cid].$el.length).toBe(1);
+      expect(view.$subviews[cid]).toBe(added);
     });
 
     it("should add subview from dom and execute parameter function", function() {
@@ -912,22 +912,22 @@ describe("Backbone-Strap Test Suite", function() {
       view.$addSubview('.subview', Backbone.StrapView, fn);
 
       // THEN
-      expect(view.subviews).not.toEqual({});
+      expect(view.$subviews).not.toEqual({});
       expect(fn).toHaveBeenCalledWith(0, jasmine.any(Object));
       expect(fn).toHaveBeenCalledWith(1, jasmine.any(Object));
 
-      var keys = _.keys(view.subviews);
+      var keys = _.keys(view.$subviews);
       expect(keys.length).toBe(2);
 
       var cid1 = keys[0];
       var cid2 = keys[1];
-      expect(view.subviews[cid1].foo).toBe('bar');
-      expect(view.subviews[cid1].$el).toBeDefined();
-      expect(view.subviews[cid1].$el.length).toBe(1);
+      expect(view.$subviews[cid1].foo).toBe('bar');
+      expect(view.$subviews[cid1].$el).toBeDefined();
+      expect(view.$subviews[cid1].$el.length).toBe(1);
 
-      expect(view.subviews[cid2].foo).toBe('bar');
-      expect(view.subviews[cid2].$el).toBeDefined();
-      expect(view.subviews[cid2].$el.length).toBe(1);
+      expect(view.$subviews[cid2].foo).toBe('bar');
+      expect(view.$subviews[cid2].$el).toBeDefined();
+      expect(view.$subviews[cid2].$el.length).toBe(1);
     });
 
     it("should add subview from dom without parameters", function() {
@@ -944,17 +944,17 @@ describe("Backbone-Strap Test Suite", function() {
       view.$addSubview('.subview', Backbone.StrapView);
 
       // THEN
-      expect(view.subviews).not.toEqual({});
+      expect(view.$subviews).not.toEqual({});
 
-      var keys = _.keys(view.subviews);
+      var keys = _.keys(view.$subviews);
       expect(keys.length).toBe(2);
 
       var cid1 = keys[0];
       var cid2 = keys[1];
-      expect(view.subviews[cid1].$el).toBeDefined();
-      expect(view.subviews[cid1].$el.length).toBe(1);
-      expect(view.subviews[cid2].$el).toBeDefined();
-      expect(view.subviews[cid2].$el.length).toBe(1);
+      expect(view.$subviews[cid1].$el).toBeDefined();
+      expect(view.$subviews[cid1].$el.length).toBe(1);
+      expect(view.$subviews[cid2].$el).toBeDefined();
+      expect(view.$subviews[cid2].$el.length).toBe(1);
     });
 
     it("should close subviews", function() {
@@ -1015,7 +1015,7 @@ describe("Backbone-Strap Test Suite", function() {
       spyOn(subview3, 'close');
 
       var view = new Backbone.StrapView();
-      view.subviews = {
+      view.$subviews = {
         foo: subview1,
         bar: subview2
       };
@@ -1033,7 +1033,7 @@ describe("Backbone-Strap Test Suite", function() {
       expect(subview1.close).toHaveBeenCalled();
       expect(subview2.close).toHaveBeenCalled();
       expect(subview3.close).toHaveBeenCalled();
-      expect(view.subviews).toEqual({});
+      expect(view.$subviews).toEqual({});
     });
 
     it("should should show loader using default css", function() {

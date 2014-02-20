@@ -419,7 +419,7 @@
       });
 
       that.$cache = {};
-      that.subviews = {};
+      that.$subviews = {};
 
       var args = [].slice.call(arguments, 0);
       if (!args || !args.length) {
@@ -680,7 +680,7 @@
 
       var exclude = {
         $cache: true,
-        subviews: true,
+        $subviews: true,
         cid: true,
         $el: true,
         el: true
@@ -704,12 +704,12 @@
     closeSubviews: function() {
       var that = this;
 
-      _.each(that.subviews, function(subview) {
+      _.each(that.$subviews, function(subview) {
         that.stopListening(subview);
         subview.close();
       });
 
-      that.subviews = {};
+      that.$subviews = {};
 
       // Close subviews not previously stored in subviews array
       for (var i in that) {
@@ -806,8 +806,8 @@
      * @return {object|array} Added view or array of added subviews.
      */
     addSubview: function(view) {
-      if (!this.subviews) {
-        this.subviews = {};
+      if (!this.$subviews) {
+        this.$subviews = {};
       }
 
       var array = view;
@@ -816,7 +816,7 @@
       }
 
       var callback = function(v) {
-        this.subviews[v.cid] = v;
+        this.$subviews[v.cid] = v;
         this.listenToOnce(v, 'close', this.removeSubview);
       };
 
@@ -833,7 +833,7 @@
     removeSubview: function(view) {
       this.stopListening(view);
       var cid = view.cid;
-      delete this.subviews[cid];
+      delete this.$subviews[cid];
       return this;
     },
 
