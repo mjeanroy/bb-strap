@@ -22,6 +22,9 @@ describe("Backbone-Strap Test Suite", function() {
 
       // THEN
       expect(tmplManager).toBeDefined();
+      expect(tmplManager.$cache).toEqual({});
+      expect(tmplManager.prefix).toBe('/templates/');
+      expect(tmplManager.suffix).toBe('.template.html');
     });
 
     it("should have an empty cache, a prefix and a suffix", function() {
@@ -32,6 +35,28 @@ describe("Backbone-Strap Test Suite", function() {
       expect(tmplManager.$cache).toEqual({});
       expect(tmplManager.prefix).toEqual('/templates/');
       expect(tmplManager.suffix).toEqual('.template.html');
+    });
+
+    it("should build template url", function() {
+      // GIVEN
+      var tmplManager = Backbone.templateManager;
+
+      // WHEN
+      var url = tmplManager.url('foo');
+
+      // THEN
+      expect(url).toBe('/templates/foo.template.html');
+    });
+
+    it("should build template id from url", function() {
+      // GIVEN
+      var tmplManager = Backbone.templateManager;
+
+      // WHEN
+      var id = tmplManager.id('/templates/foo.template.html');
+
+      // THEN
+      expect(id).toBe('foo');
     });
 
     it("should load template only once", function() {
@@ -51,11 +76,15 @@ describe("Backbone-Strap Test Suite", function() {
       this.xhr.done.argsForCall[0][0]('foo result');
       expect(callback).toHaveBeenCalledWith('foo result');
 
+      // call again
       callback.reset();
       $.get.reset();
+
       tmplManager.load('foo', callback);
+
       expect(callback).not.toHaveBeenCalled();
       expect($.get).not.toHaveBeenCalled();
+
       this.xhr.done.argsForCall[0][0]('foo result');
       expect(callback).toHaveBeenCalled();
     });

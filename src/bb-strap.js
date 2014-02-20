@@ -52,7 +52,7 @@
     this.$cache = {};
     this.prefix = '/templates/';
     this.suffix = '.template.html';
-    this.initialize.apply(this, Array.prototype.slice.call(arguments, 0));
+    this.initialize.apply(this, [].slice.call(arguments, 0));
   };
 
   Backbone.TemplateManager.prototype = {
