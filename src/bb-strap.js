@@ -22,7 +22,18 @@
  * THE SOFTWARE.
  */
 
-(function($, _, Backbone) {
+(function(factory) {
+  'use strict';
+
+  if (typeof define === 'function' && define.amd) {
+    // AMD. Register as an anonymous module.
+    define(['jquery', 'underscore', 'backbone'], factory);
+  } else {
+    // Browser globals
+    factory(jQuery, _, Backbone);
+  }
+
+}(function($, _, Backbone) {
 
   'use strict';
 
@@ -875,4 +886,4 @@
     }
   });
 
-})(jQuery, _, Backbone);
+}));
