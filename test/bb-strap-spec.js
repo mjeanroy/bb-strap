@@ -594,6 +594,22 @@ describe("Backbone-Strap Test Suite", function() {
 
   describe("StrapView Test Suite", function() {
 
+    it("should initialize view with given options", function() {
+      // GIVEN
+      var opts = {
+        foo: 'bar'
+      };
+
+      // WHEN
+      var view = new Backbone.StrapView(opts);
+
+      // THEN
+      expect(view.foo).toBe('bar');
+      expect(view.$cache).toEqual({});
+      expect(view.subviews).toEqual({});
+      expect(view.templateManager).toBe(Backbone.templateManager);
+    });
+
     it("should initialize an empty view", function() {
       // GIVEN
       spyOn(Backbone.StrapView.prototype, 'initialize').andCallThrough();
@@ -685,6 +701,20 @@ describe("Backbone-Strap Test Suite", function() {
       expect(view.$cache['#foo']).toBeDefined();
     });
 
+    it("should clear selector cache", function() {
+      // GIVEN
+      var view = new Backbone.StrapView();
+      view.$cache = {
+        '#foo': $('<span></span>')
+      };
+
+      // WHEN
+      var result = view.clearCache();
+
+      // THEN
+      expect(result).toBe(view);
+    });
+
     it("should dispose view", function() {
       // GIVEN
       var view = new Backbone.StrapView();
@@ -698,9 +728,10 @@ describe("Backbone-Strap Test Suite", function() {
       spyOn(view, 'destroy').andCallThrough();
 
       // WHEN
-      view.dispose();
+      var result = view.dispose();
 
       // THEN
+      expect(result).toBe(view);
       expect(view.$cache).toEqual({});
       expect(view.onDispose).toHaveBeenCalled();
       expect(view.clearCache).toHaveBeenCalled();
@@ -720,9 +751,10 @@ describe("Backbone-Strap Test Suite", function() {
       view.sub = subview;
 
       // WHEN
-      view.destroy();
+      var result = view.destroy();
 
       // THEN
+      expect(result).toBe(view);
       expect(view.foo).toBe(null);
       expect(view.sub).toBe(null);
       expect(view.subviews).toEqual({});
@@ -766,9 +798,10 @@ describe("Backbone-Strap Test Suite", function() {
       view.subviews[cid] = subview;
 
       // WHEN
-      view.removeSubview(subview);
+      var result = view.removeSubview(subview);
 
       // THEN
+      expect(result).toBe(view);
       expect(view.stopListening).toHaveBeenCalledWith(subview);
       expect(view.subviews[cid]).toBeUndefined();
       expect(view.subviews).toEqual({});
@@ -792,75 +825,6 @@ describe("Backbone-Strap Test Suite", function() {
       expect(added.length).toBe(2);
       expect(added[0]).toBe(subview1);
       expect(added[1]).toBe(subview2);
-    });
-
-    it("should close subviews", function() {
-      // GIVEN
-      var view = new Backbone.StrapView();
-      spyOn(view, 'dispose');
-      spyOn(view, 'remove');
-      spyOn(view, 'destroy');
-
-      var fn = jasmine.createSpy('fn');
-      view.on('close', fn);
-
-      // WHEN
-      view.close();
-
-      // THEN
-      expect(view.dispose).toHaveBeenCalled();
-      expect(view.remove).toHaveBeenCalled();
-      expect(view.destroy).toHaveBeenCalled();
-      expect(fn).toHaveBeenCalledWith(view);
-    });
-
-    it("should clear subviews", function() {
-      // GIVEN
-      var view = new Backbone.StrapView();
-      view.$el = jasmine.createSpyObj('$el', ['empty']);
-      spyOn(view, 'dispose');
-      spyOn(view, 'remove');
-      spyOn(view, 'destroy');
-
-      var fn = jasmine.createSpy('fn');
-      view.on('clear', fn);
-
-      // WHEN
-      view.clear();
-
-      // THEN
-      expect(view.dispose).toHaveBeenCalled();
-      expect(view.remove).not.toHaveBeenCalled();
-      expect(view.$el.empty).toHaveBeenCalled();
-      expect(view.destroy).toHaveBeenCalled();
-      expect(fn).toHaveBeenCalledWith(view);
-    });
-
-    it("should close subviews", function() {
-      // GIVEN
-      var subview1 = jasmine.createSpyObj('subview1', ['dispose']);
-      subview1.cid = 'foo';
-
-      var subview2 = jasmine.createSpyObj('subview1', ['dispose']);
-      subview2.cid = 'bar';
-
-      var view = new Backbone.StrapView();
-      view.subviews = {
-        foo: subview1,
-        bar: subview2
-      };
-
-      spyOn(view, 'stopListening');
-
-      // WHEN
-      view.closeSubviews();
-
-      // THEN
-      expect(view.stopListening).toHaveBeenCalledWith(subview1);
-      expect(view.stopListening).toHaveBeenCalledWith(subview2);
-      expect(subview1.dispose).toHaveBeenCalled();
-      expect(subview2.dispose).toHaveBeenCalled();
-      expect(view.subviews).toEqual({});
     });
 
     it("should add subview from dom", function() {
@@ -917,8 +881,7 @@ describe("Backbone-Strap Test Suite", function() {
 
       // THEN
       expect(added).toBeDefined();
-      expect(added.length).toBe(1);
-      expect(added[0] instanceof Backbone.StrapView).toBe(true);
+      expect(added instanceof Backbone.StrapView).toBe(true);
       expect(view.subviews).not.toEqual({});
 
       var keys = _.keys(view.subviews);
@@ -928,7 +891,7 @@ describe("Backbone-Strap Test Suite", function() {
       expect(view.subviews[cid].foo).toBe('bar');
       expect(view.subviews[cid].$el).toBeDefined();
       expect(view.subviews[cid].$el.length).toBe(1);
-      expect(view.subviews[cid]).toBe(added[0]);
+      expect(view.subviews[cid]).toBe(added);
     });
 
     it("should add subview from dom and execute parameter function", function() {
@@ -994,6 +957,85 @@ describe("Backbone-Strap Test Suite", function() {
       expect(view.subviews[cid2].$el.length).toBe(1);
     });
 
+    it("should close subviews", function() {
+      // GIVEN
+      var view = new Backbone.StrapView();
+      spyOn(view, 'dispose');
+      spyOn(view, 'remove');
+      spyOn(view, 'destroy');
+
+      var fn = jasmine.createSpy('fn');
+      view.on('close', fn);
+
+      // WHEN
+      var result = view.close();
+
+      // THEN
+      expect(result).toBe(view);
+      expect(view.dispose).toHaveBeenCalled();
+      expect(view.remove).toHaveBeenCalled();
+      expect(view.destroy).toHaveBeenCalled();
+      expect(fn).toHaveBeenCalledWith(view);
+    });
+
+    it("should clear subviews", function() {
+      // GIVEN
+      var view = new Backbone.StrapView();
+      view.$el = jasmine.createSpyObj('$el', ['empty']);
+      spyOn(view, 'dispose');
+      spyOn(view, 'remove');
+      spyOn(view, 'destroy');
+
+      var fn = jasmine.createSpy('fn');
+      view.on('clear', fn);
+
+      // WHEN
+      var result = view.clear();
+
+      // THEN
+      expect(result).toBe(view);
+      expect(view.dispose).toHaveBeenCalled();
+      expect(view.remove).not.toHaveBeenCalled();
+      expect(view.$el.empty).toHaveBeenCalled();
+      expect(view.destroy).toHaveBeenCalled();
+      expect(fn).toHaveBeenCalledWith(view);
+    });
+
+    it("should close subviews", function() {
+      // GIVEN
+      var subview1 = new Backbone.StrapView();
+      spyOn(subview1, 'close');
+      subview1.cid = 'foo';
+
+      var subview2 = new Backbone.StrapView();
+      spyOn(subview2, 'close');
+      subview2.cid = 'bar';
+
+      var subview3 = new Backbone.StrapView();
+      spyOn(subview3, 'close');
+
+      var view = new Backbone.StrapView();
+      view.subviews = {
+        foo: subview1,
+        bar: subview2
+      };
+      view.subview3 = subview3;
+
+      spyOn(view, 'stopListening');
+
+      // WHEN
+      var result = view.closeSubviews();
+
+      // THEN
+      expect(result).toBe(view);
+      expect(view.stopListening).toHaveBeenCalledWith(subview1);
+      expect(view.stopListening).toHaveBeenCalledWith(subview2);
+      expect(subview1.close).toHaveBeenCalled();
+      expect(subview2.close).toHaveBeenCalled();
+      expect(subview3.close).toHaveBeenCalled();
+      expect(view.subviews).toEqual({});
+    });
+
     it("should should show loader using default css", function() {
       // GIVEN
       var $el = $('<div></div>');
@@ -1003,9 +1045,10 @@ describe("Backbone-Strap Test Suite", function() {
       });
 
       // WHEN
-      view.showLoader();
+      var result = view.showLoader();
 
       // THEN
+      expect(result).toBe(view);
       expect(view.$el.hasClass('loading')).toBe(true);
 
       var $i = view.$el.find('i');
@@ -1024,9 +1067,10 @@ describe("Backbone-Strap Test Suite", function() {
       });
 
       // WHEN
-      view.showLoader();
+      var result = view.showLoader();
 
       // THEN
+      expect(result).toBe(view);
       expect(view.$loading).toBe(true);
       expect(view.$el.hasClass('foo')).toBe(true);
       expect(view.$el.hasClass('loading')).toBe(false);
@@ -1051,9 +1095,10 @@ describe("Backbone-Strap Test Suite", function() {
       view.$loading = true;
 
       // WHEN
-      view.hideLoader();
+      var result = view.hideLoader();
 
       // THEN
+      expect(result).toBe(view);
       expect(view.$loading).toBe(false);
       expect(view.$el.hasClass('loading')).toBe(false);
 
@@ -1101,9 +1146,10 @@ describe("Backbone-Strap Test Suite", function() {
       view.foo = new Backbone.Model();
 
       // WHEN
-      view.$read('foo');
+      var result = view.$read('foo');
 
       // THEN
+      expect(result).toBe(view);
       expect(view.foo.get('id')).toBe(1);
       expect(view.foo.get('name')).toBe('bar');
       expect(window.foo).toBeUndefined();
@@ -1120,9 +1166,10 @@ describe("Backbone-Strap Test Suite", function() {
       view.foo = new Backbone.Model();
 
       // WHEN
-      view.$read('$$foo', 'foo');
+      var result = view.$read('$$foo', 'foo');
 
       // THEN
+      expect(result).toBe(view);
       expect(view.foo.get('id')).toBe(1);
       expect(view.foo.get('name')).toBe('bar');
       expect(window.$$foo).toBeUndefined();
@@ -1139,9 +1186,10 @@ describe("Backbone-Strap Test Suite", function() {
       view.foo = new Backbone.Model();
 
       // WHEN
-      view.$$read('foo');
+      var result = view.$$read('foo');
 
       // THEN
+      expect(result).toBe(view);
       expect(view.foo.get('id')).toBe(1);
       expect(view.foo.get('name')).toBe('bar');
       expect(window.$$foo).toBeUndefined();
@@ -1164,32 +1212,79 @@ describe("Backbone-Strap Test Suite", function() {
       expect(Backbone.templateManager.load).not.toHaveBeenCalled();
     });
 
-    it("should load template and render view using datas function", function() {
+    it("should have default partials", function() {
       // GIVEN
-      spyOn(Backbone.templateManager, 'load').andCallThrough();
-      spyOn(Backbone.StrapView.prototype, 'render').andCallThrough();
-      spyOn(Backbone.StrapView.prototype, 'onLoaded').andCallThrough();
-      spyOn(Backbone.StrapView.prototype, 'populate').andCallThrough();
-
-      var fakeData = {
-        id: 1
-      };
+      var view = new Backbone.StrapView();
 
       // WHEN
-      var view = new Backbone.StrapView({
-        templates: 'foo',
-        datas: function() {
-          return fakeData;
-        }
-      });
+      var partials = view.partials();
 
       // THEN
-      expect(view.render).toHaveBeenCalled();
-      expect(Backbone.templateManager.load).toHaveBeenCalledWith('foo', jasmine.any(Function), view);
+      expect(partials).toEqual({});
+    });
 
-      Backbone.templateManager.load.argsForCall[0][1].call(view, 'foo template');
-      expect(view.onLoaded).toHaveBeenCalledWith('foo template');
-      expect(view.populate).toHaveBeenCalledWith('foo template', fakeData);
+    it("should compile html template without data", function() {
+      // GIVEN
+      var view = new Backbone.StrapView();
+
+      var template = 'foo';
+      var compiledHtml = '<span>foo</span>';
+      spyOn(_, 'template').andReturn(compiledHtml);
+
+      // WHEN
+      var html = view.compileTemplate(template);
+
+      // THEN
+      expect(html).toEqual(compiledHtml);
+      expect(_.template).toHaveBeenCalledWith(template, {});
+    });
+
+    it("should compile html template with data", function() {
+      // GIVEN
+      var view = new Backbone.StrapView();
+      var data = {
+        foo: 'bar'
+      };
+
+      var template = 'foo';
+      var compiledHtml = '<span>foo</span>';
+      spyOn(_, 'template').andReturn(compiledHtml);
+
+      // WHEN
+      var html = view.compileTemplate(template, data);
+
+      // THEN
+      expect(html).toEqual(compiledHtml);
+      expect(_.template).toHaveBeenCalledWith(template, data);
+    });
+
+    it("should populate view", function() {
+      // GIVEN
+      var view = new Backbone.StrapView();
+      var template = 'foo';
+      var data = {
+        foo: 'bar'
+      };
+
+      spyOn(view, 'preRender');
+      spyOn(view, 'clearCache').andReturn(view);
+      spyOn(view, 'hideLoader').andReturn(view);
+      spyOn(view, 'onReady');
+      spyOn(view, 'closeSubviews').andReturn(view);
+      spyOn(view, 'compileTemplate').andReturn('<span>foo</span>');
+
+      // WHEN
+      var result = view.populate(template, data);
+
+      // THEN
+      expect(result).toBe(view);
+      expect(result.preRender).toHaveBeenCalled();
+      expect(result.clearCache).toHaveBeenCalled();
+      expect(result.hideLoader).toHaveBeenCalled();
+      expect(result.closeSubviews).toHaveBeenCalled();
+      expect(result.onReady).toHaveBeenCalled();
+
+      expect(view.$el.html()).toBe('<span>foo</span>');
     });
 
     it("should load template and render view using toJSON function", function() {
@@ -1239,7 +1334,7 @@ describe("Backbone-Strap Test Suite", function() {
       // WHEN
       var view = new Backbone.StrapView({
         templates: ['foo', 'bar'],
-        datas: function() {
+        toJSON: function() {
           return fakeData;
         },
         partials: function(tmpls) {
@@ -1290,7 +1385,7 @@ describe("Backbone-Strap Test Suite", function() {
     });
 
     it("should unset subscriptions", function() {
-      // WHEN
+      // GIVEN
       var view = new Backbone.StrapView({
         subscriptions: {
           'foo': 'fooCallback'
@@ -1298,7 +1393,6 @@ describe("Backbone-Strap Test Suite", function() {
         fooCallback: jasmine.createSpy('fooCallback')
       });
 
-      // THEN
       expect(Backbone.Mediator.channels['foo']).toBeDefined();
       expect(Backbone.Mediator.channels['foo'][0]).toEqual({
         fn: view.fooCallback,
@@ -1306,7 +1400,11 @@ describe("Backbone-Strap Test Suite", function() {
         once: false
       });
 
-      view.undelegateEvents();
+      // WHEN
+      var result = view.undelegateEvents();
+
+      // THEN
+      expect(result).toBe(view);
       expect(Backbone.Mediator.channels['foo']).toEqual([]);
     });
   });

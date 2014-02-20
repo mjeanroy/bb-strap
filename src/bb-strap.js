@@ -27,10 +27,10 @@
 
   if (typeof define === 'function' && define.amd) {
     // AMD. Register as an anonymous module.
-    define(['jquery', 'underscore', 'backbone'], factory);
+    define(['jquery', 'underscore', 'backbone', 'Mustache'], factory);
   } else {
     // Browser globals
-    factory(jQuery, _, Backbone);
+    factory(jQuery, _, Backbone, window.Mustache || null);
   }
 
 }(function($, _, Backbone) {
@@ -432,10 +432,11 @@
 
       if (that.isEmpty()) {
         that.postInit.apply(that, args);
-      }
-      else {
+      } else {
         that.onReady.apply(that, args);
       }
+
+      return that;
     },
 
     /** Hook to implement for view initialization */
@@ -444,58 +445,80 @@
     /** View subscriptions */
     subscriptions: {},
 
-    /** Override delegate events to subscribe to subscriptions */
+    /**
+     * Override delegate events to subscribe to subscriptions.
+     * @return {object} this
+     * @override
+     */
     delegateEvents: function() {
       Backbone.View.prototype.delegateEvents.apply(this, [].slice.call(arguments, 0));
-      this.setSubscriptions();
+      return this.setSubscriptions();
     },
 
-    /** Override undelegate events to unsubscribe to subscriptions */
+    /**
+     * Override undelegate events to unsubscribe to subscriptions.
+     * @return {object} this
+     * @override
+     */
     undelegateEvents: function() {
       Backbone.View.prototype.undelegateEvents.apply(this, [].slice.call(arguments, 0));
-      this.unsetSubscriptions();
+      return this.unsetSubscriptions();
     },
 
-    /** Subscribe to new subscriptions */
+    /**
+     * Subscribe to new subscriptions.
+     * @param {*=} subscriptions Optional subscriptions.
+     * @return {object} this
+     */
     setSubscriptions: function(subscriptions) {
       var callbacks = subscriptions || this.subscriptions;
-      if (!callbacks || _.isEmpty(callbacks)) {
-        return;
+      if (callbacks && !_.isEmpty(callbacks)) {
+
+        // Ensure we don't subscribe twice
+        this.unsetSubscriptions(callbacks);
+
+        var callback = function(subscription, channel) {
+          var once = !!subscription.once;
+
+          if (_.isString(subscription)) {
+            subscription = this[subscription];
+          }
+
+          Backbone.Mediator.subscribe(channel, subscription, this, once);
+        };
+
+        _.each(callbacks, callback, this);
       }
 
-      // Ensure we don't subscribe twice
-      this.unsetSubscriptions(callbacks);
-
-      _.each(callbacks, function(subscription, channel) {
-        var once = !!subscription.once;
-
-        if (_.isString(subscription)) {
-          subscription = this[subscription];
-        }
-
-        Backbone.Mediator.subscribe(channel, subscription, this, once);
-      }, this);
+      return this;
     },
 
-    /** Unsubscribe to each subscription */
+    /**
+     * Unsubscribe to each subscription.
+     * @return {object} this
+     */
     unsetSubscriptions: function(subscriptions) {
       var callbacks = subscriptions || this.subscriptions;
 
-      if (!callbacks || _.isEmpty(callbacks)) {
-        return;
+      if (callbacks && !_.isEmpty(callbacks)) {
+
+        var callback = function(subscription, channel) {
+          if (_.isString(subscription)) {
+            subscription = this[subscription];
+          }
+
+          Backbone.Mediator.unsubscribe(channel, subscription.$once || subscription, this);
+        };
+
+        _.each(callbacks, callback, this);
       }
 
-      _.each(callbacks, function(subscription, channel) {
-        if (_.isString(subscription)) {
-          subscription = this[subscription];
-        }
-        Backbone.Mediator.unsubscribe(channel, subscription.$once || subscription, this);
-      }, this);
+      return this;
     },
 
     /**
      * Check if view is empty, i.e. dom is empty.
-     * @returns {boolean} True if view is empty, false otherwise.
+     * @return {boolean} True if view is empty, false otherwise.
      */
     isEmpty: function() {
       return !$.trim(this.$el.html());
@@ -536,6 +559,7 @@
      * Window object value is automatically destroyed.
      * @param {string} varName Name of variable on window object.
      * @param {string?} objName Object name on view, default is name on window object.
+     * @return {object} this
      */
     $read: function(varName, objName) {
       if (window[varName]) {
@@ -543,6 +567,7 @@
         this[obj].set(window[varName]);
         delete window[varName];
       }
+      return this;
     },
 
     /**
@@ -551,14 +576,19 @@
      * Window value is expected to be equal to '$$[varName]' and model/collection name
      * is expected to be [varName].
      * @param {string} varName Name of variable.
+     * @return {object} this
      */
     $$read: function(varName) {
-      this.$read('$$' + varName, varName);
+      return this.$read('$$' + varName, varName);
     },
 
-    /** Clear internal cache. */
+    /**
+     * Clear internal cache.
+     * @return {object} this
+     */
     clearCache: function() {
       this.$cache = {};
+      return this;
     },
 
     /** Hook to implement, called before view rendering */
@@ -585,33 +615,36 @@
       return results;
     },
 
-    /** Hook that give custom partials used to populate view */
-    partials: function(tmpls, mainTemplate) {
+    /**
+     * Hook that give custom partials used to populate view.
+     * Default is empty object.
+     * @return {object} Partials.
+     */
+    partials: function() {
       return {};
     },
 
     /** Callback when templates are fully loaded */
     onLoaded: function(tmpl) {
-      var datas = _.result(this, 'toJSON');
-
-      if (_.isUndefined(datas) || _.isNull(datas)) {
-        datas = _.result(this, 'datas');
-      }
+      var data = _.result(this, 'toJSON');
 
       if (_.isString(tmpl)) {
         // Don't need partials
-        this.populate(tmpl, datas || {});
+        this.populate(tmpl, data || {});
       } else {
         // Load partials
         var templates = _.result(this, 'templates');
         var mainTemplate = tmpl[templates[0]];
         var partials = this.$partials(tmpl, templates[0]);
         partials = _.extend(partials, this.partials(tmpl, templates[0]) || {});
-        this.populate(mainTemplate, datas, partials);
+        this.populate(mainTemplate, data, partials);
       }
     },
 
-    /** Render Function */
+    /**
+     * Render Function.
+     * @return {object} this
+     */
     render: function() {
       var isReady = _.result(this, 'isReady');
       if (isReady) {
@@ -629,6 +662,7 @@
      * - Stop listening to events from models or collections.
      * - Undelegate dom events.
      * - Close subviews and clear internal cache.
+     * @return {object} this.
      */
     dispose: function() {
       var that = this;
@@ -637,6 +671,7 @@
       that.closeSubviews();
       that.stopListening();
       that.undelegateEvents();
+      return this;
     },
 
     /** Destroy view internal data. */
@@ -654,9 +689,7 @@
       for (var key in that) {
         if (that.hasOwnProperty(key) && !exclude[key]) {
           var value = that[key];
-
           if (value instanceof Backbone.StrapView) {
-            // Should not happen...
             value.close();
           }
 
@@ -673,10 +706,10 @@
 
       _.each(that.subviews, function(subview) {
         that.stopListening(subview);
-        if (subview.dispose) {
-          subview.dispose();
-        }
+        subview.close();
       });
+
+      that.subviews = {};
 
       // Close subviews not previously stored in subviews array
       for (var i in that) {
@@ -687,7 +720,7 @@
         }
       }
 
-      that.subviews = {};
+      return that;
     },
 
     /** Hook to implement when view is disposed */
@@ -698,13 +731,15 @@
      * - Dispose view events.
      * - Remove el from DOM.
      * - Destroy internal data.
+     * @return {object} this
      */
     close: function() {
       var that = this;
-      that.trigger('close', this);
+      that.trigger('close', that);
       that.dispose();
       that.remove();
       that.destroy();
+      return that;
     },
 
     /**
@@ -712,52 +747,63 @@
      * - Dispose view events.
      * - Empty el element (does not remove el but clear content).
      * - Destroy internal data.
+     * @return {object} this
      */
     clear: function() {
       var that = this;
-      that.trigger('clear', this);
+      that.trigger('clear', that);
       that.dispose();
       that.$el.empty();
       that.destroy();
+      return that;
     },
 
     /**
-     * Populate view with template, datas and partials.
-     * @param template
-     * @param datas
-     * @param partials
+     * Populate view with template, data and partials.
+     * @param {string} template Template.
+     * @param {*=} data Optional data.
+     * @param {object=} partials Optional partials.
+     * @return {object} this
      */
-    populate: function(template, datas, partials) {
+    populate: function(template, data, partials) {
       var that = this;
       var args = [].slice.call(arguments, 0);
       var html = that.toHtml.apply(that, args);
 
       // Close dom elements before rendering
-      that.closeSubviews();
+      that.closeSubviews()
+          .preRender();
 
-      // Clear cache and call callbacks
-      that.preRender();
-      that.clearCache();
+      // Hide loader and render
+      that.clearCache()
+          .hideLoader();
 
-      // Render
-      that.hideLoader();
       that.$el.html(html);
+
+      // Ready callback
       that.onReady();
+      return that;
     },
 
-    /** Generate html */
+    /** Generate html from view. */
     toHtml: function() {
       return this.compileTemplate.apply(this, [].slice.call(arguments, 0));
     },
 
-    /** Compile template using underscore */
-    compileTemplate: function(template, datas) {
-      return _.template(template, datas || {});
+    /**
+     * Compile template using underscore.
+     * @param {string} template Template.
+     * @param {*=} data Optional data.
+     * @return {string} Compiled template.
+     */
+    compileTemplate: function(template, data) {
+      return _.template(template, data || {});
     },
 
     /**
      * Add subview to the view.
      * @param view Subview to add.
+     * @return {object|array} Added view or array of added subviews.
      */
     addSubview: function(view) {
       if (!this.subviews) {
@@ -769,13 +815,12 @@
         array = [array];
       }
 
-      _.each(array, function(v) {
-        var cid = v.cid;
-        this.subviews[cid] = v;
-
-        // Remove automatically when subview is closed
+      var callback = function(v) {
+        this.subviews[v.cid] = v;
         this.listenToOnce(v, 'close', this.removeSubview);
-      }, this);
+      };
+
+      _.each(array, callback, this);
 
       return view;
     },
@@ -783,11 +828,13 @@
     /**
      * Remove view from subviews object.
      * @param view Subview.
+     * @return {object} this.
      */
     removeSubview: function(view) {
       this.stopListening(view);
       var cid = view.cid;
       delete this.subviews[cid];
+      return this;
     },
 
     /**
@@ -795,6 +842,7 @@
      * @param {*} $el Subview selector.
      * @param {*} ViewClass Subview class.
      * @param {*=} params View initialization parameters (function or object).
+     * @return {object|array} Added subview or array of added subviews.
      */
     $addSubview: function($el, ViewClass, params) {
       var that = this;
@@ -815,15 +863,19 @@
       }
 
       var added = [];
-      $el.each(function(idx, $current) {
+      var callback = function(idx, $current) {
         var options = _.extend(fn.call(that, idx, $current), {
           el: $current
         });
 
-        added.push(that.addSubview(new ViewClass(options)));
-      });
+        var currentSubView = new ViewClass(options);
+        that.addSubview(currentSubView);
+        added.push(currentSubView);
+      };
 
-      return added;
+      $el.each(callback);
+
+      return added.length === 1 ? added[0] : added;
     },
 
     /** Css class appended to el element when loader is visible. */
@@ -832,7 +884,10 @@
     /** Css class set to loader icon. */
     iconLoader: 'icon-loader',
 
-    /** Show loader icon */
+    /**
+     * Show loader icon.
+     * @return {object} this.
+     */
     showLoader: function() {
       var that = this;
       var $i = that.$loader;
@@ -841,12 +896,16 @@
       if (!$i && iconLoader) {
         that.$loading = true;
         $i = $('<i></i>').addClass(iconLoader);
-        that.$el.addClass(loadingClass).append($i);
+        that.$el.addClass(loadingClass).html($i);
         that.$loader = $i;
       }
+      return this;
     },
 
-    /** Hide loader icon */
+    /**
+     * Hide loader icon.
+     * @return {object} this.
+     */
     hideLoader: function() {
       var that = this;
       if (that.$loader) {
@@ -856,6 +915,7 @@
         that.$loader.remove();
         that.$loader = null;
       }
+      return this;
     }
   });
 
