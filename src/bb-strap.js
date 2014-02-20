@@ -370,23 +370,38 @@
 
   Backbone.StrapRouter = Backbone.Router.extend({
 
+    /**
+     * Initialize router.
+     * @param {object=} options Optional options.
+     * @returns {object} this.
+     */
     initialize: function(options) {
       // Main content
-      this.$content = $((options || {}).content || '#content');
+      var opts = options || {};
+      var content = opts.content || '#content';
+      this.$content = $(content);
 
-      Backbone.history.start({
+      var defaults = {
         silent: false,
         pushState: true
-      });
+      };
+
+      Backbone.history.start(_.extend(defaults, _.pick(opts, 'silent', 'pushState')));
+      return this;
     },
 
+    /**
+     * Show new view.
+     * @param {*} ViewImpl View class.
+     * @param {*=} options Optional view options.
+     * @returns {*} this.
+     */
     show: function(ViewImpl, options) {
       var opts = options || {};
       opts.el = this.$content;
 
-      var app = window.app;
-      app.replaceCurrentView(ViewImpl, opts);
-      app.scrollTop(0);
+      window.app.replaceCurrentView(ViewImpl, opts).scrollTop(0);
+      return this;
     }
   });
 

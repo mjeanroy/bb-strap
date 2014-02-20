@@ -500,6 +500,98 @@ describe("Backbone-Strap Test Suite", function() {
     });
   });
 
+  describe("Router Test Suite", function() {
+    beforeEach(function() {
+      spyOn(Backbone.history, 'start');
+    });
+
+    it("should initialize router with default options", function() {
+      // WHEN
+      var router = new Backbone.StrapRouter();
+
+      // THEN
+      expect(router.$content).toBeDefined();
+      expect(router.$content instanceof jQuery).toBe(true);
+      expect(router.$content.selector).toBe('#content');
+
+      expect(Backbone.history.start).toHaveBeenCalledWith({
+        silent: false,
+        pushState: true
+      });
+    });
+
+    it("should initialize router with custom options", function() {
+      // WHEN
+      var router = new Backbone.StrapRouter({
+        content: '#foo',
+        silent: true,
+        pushState: false
+      });
+
+      // THEN
+      expect(router.$content).toBeDefined();
+      expect(router.$content instanceof jQuery).toBe(true);
+      expect(router.$content.selector).toBe('#foo');
+
+      expect(Backbone.history.start).toHaveBeenCalledWith({
+        silent: true,
+        pushState: false
+      });
+    });
+
+    it("should show new view", function() {
+      // GIVEN
+      window.app = jasmine.createSpyObj('app', ['replaceCurrentView', 'scrollTop']);
+      window.app.replaceCurrentView.andReturn(window.app);
+      window.app.scrollTop.andReturn(window.app);
+
+      var router = new Backbone.StrapRouter();
+
+      var ViewImpl = jasmine.createSpy('ViewImpl');
+
+      // WHEN
+      router.show(ViewImpl);
+
+      // THEN
+      expect(window.app.replaceCurrentView).toHaveBeenCalled();
+      expect(window.app.scrollTop).toHaveBeenCalled();
+
+      var args = window.app.replaceCurrentView.mostRecentCall.args;
+      expect(args[0]).toBe(ViewImpl);
+      expect(args[1]).toEqual({
+        el: router.$content
+      });
+    });
+
+    it("should show new view with options", function() {
+      // GIVEN
+      window.app = jasmine.createSpyObj('app', ['replaceCurrentView', 'scrollTop']);
+      window.app.replaceCurrentView.andReturn(window.app);
+      window.app.scrollTop.andReturn(window.app);
+
+      var router = new Backbone.StrapRouter();
+
+      var ViewImpl = jasmine.createSpy('ViewImpl');
+      var opts = {
+        foo: 'bar'
+      };
+
+      // WHEN
+      router.show(ViewImpl, opts);
+
+      // THEN
+      expect(window.app.replaceCurrentView).toHaveBeenCalled();
+      expect(window.app.scrollTop).toHaveBeenCalled();
+
+      var args = window.app.replaceCurrentView.mostRecentCall.args;
+      expect(args[0]).toBe(ViewImpl);
+      expect(args[1]).toEqual({
+        foo: 'bar',
+        el: router.$content
+      });
+    });
+  });
+
   describe("StrapView Test Suite", function() {
 
     it("should initialize an empty view", function() {
