@@ -117,6 +117,242 @@ describe("Backbone-Strap Test Suite", function() {
     });
   });
 
+  describe("Backbone.Mediator Test Suite", function() {
+    it("should have a mediator initialized", function() {
+      // WHEN
+      var defaultsChannels = Backbone.Mediator.channels;
+
+      // THEN
+      expect(defaultsChannels).toEqual({});
+    });
+
+    it("should subscribe to a new channel", function() {
+      // GIVEN
+      var fn = jasmine.createSpy('fn');
+      var context = fn;
+
+      // WHEN
+      var result = Backbone.Mediator.subscribe("foo", fn, fn);
+
+      // THEN
+      expect(result).toBe(Backbone.Mediator);
+      expect(Backbone.Mediator.channels['foo']).toBeDefined();
+      expect(Backbone.Mediator.channels['foo']).toEqual([
+        {
+          fn: fn,
+          context: context,
+          once: false
+        }
+      ]);
+    });
+
+    it("should clear subscriptions", function() {
+      // GIVEN
+      Backbone.Mediator.channels['foo'] = [
+        {
+          fn: jasmine.any(Function),
+          context: jasmine.any(Function),
+          once: false
+        }
+      ];
+
+      // WHEN
+      var result = Backbone.Mediator.clear();
+
+      // THEN
+      expect(result).toBe(Backbone.Mediator);
+      expect(Backbone.Mediator.channels).toEqual({});
+    });
+
+    it("should subscribe twice to a new channel", function() {
+      // GIVEN
+      var fn1 = jasmine.createSpy('fn1');
+      var fn2 = jasmine.createSpy('fn2');
+      Backbone.Mediator.subscribe("foo", fn1, fn1);
+
+      // WHEN
+      Backbone.Mediator.subscribe("foo", fn2, fn2);
+
+      // THEN
+      expect(Backbone.Mediator.channels['foo']).toBeDefined();
+      expect(Backbone.Mediator.channels['foo']).toEqual([
+        { fn: fn1, context: fn1, once: false },
+        { fn: fn2, context: fn2, once: false }
+      ]);
+    });
+
+    it("should unsubscribe to channel", function() {
+      // GIVEN
+      var fn1 = jasmine.createSpy('fn1');
+      Backbone.Mediator.channels['foo'] = [
+        {
+          fn: fn1,
+          context: fn1,
+          once: false
+        }
+      ];
+
+      // WHEN
+      var result = Backbone.Mediator.unsubscribe('foo');
+
+      // THEN
+      expect(result).toBe(Backbone.Mediator);
+      expect(Backbone.Mediator.channels['foo']).toEqual([]);
+    });
+
+    it("should unsubscribe everything if no argument is given", function() {
+      // GIVEN
+      var fn1 = jasmine.createSpy('fn1');
+      Backbone.Mediator.channels['foo'] = [
+        {
+          fn: fn1,
+          context: fn1,
+          once: false
+        }
+      ];
+
+      // WHEN
+      var result = Backbone.Mediator.unsubscribe();
+
+      // THEN
+      expect(result).toBe(Backbone.Mediator);
+      expect(Backbone.Mediator.channels).toEqual({});
+    });
+
+    it("should unsubscribe a function of channel", function() {
+      // GIVEN
+      var fn1 = jasmine.createSpy('fn1');
+      Backbone.Mediator.channels['foo'] = [
+        {
+          fn: fn1,
+          context: fn1,
+          once: false
+        }
+      ];
+
+      // WHEN
+      var result = Backbone.Mediator.unsubscribe('foo', fn1, fn1);
+
+      // THEN
+      expect(result).toBe(Backbone.Mediator);
+      expect(Backbone.Mediator.channels['foo']).toEqual([]);
+    });
+
+    it("should unsubscribe a function of channel and keep others", function() {
+      // GIVEN
+      var fn1 = jasmine.createSpy('fn1');
+      var fn2 = jasmine.createSpy('fn2');
+
+      Backbone.Mediator.channels['foo'] = [
+        {
+          fn: fn1,
+          context: fn1,
+          once: false
+        },
+        {
+          fn: fn2,
+          context: fn2,
+          once: false
+        }
+      ];
+
+      // WHEN
+      var result = Backbone.Mediator.unsubscribe('foo', fn2, fn2);
+
+      // THEN
+      expect(result).toBe(Backbone.Mediator);
+      expect(Backbone.Mediator.channels['foo']).toEqual([{
+        fn: fn1,
+        context: fn1,
+        once: false
+      }]);
+    });
+
+    it("should publish to dedicated channels", function() {
+      // GIVEN
+      var fn1 = jasmine.createSpy('fn1');
+      var fn2 = jasmine.createSpy('fn2');
+
+      Backbone.Mediator.channels['foo'] = [
+        {
+          fn: fn1,
+          context: fn1,
+          once: false
+        },
+        {
+          fn: fn2,
+          context: fn2,
+          once: false
+        }
+      ];
+
+      // WHEN
+      var result = Backbone.Mediator.publish('foo', 1, 2);
+
+      // THEN
+      expect(result).toBe(Backbone.Mediator);
+      expect(fn1).toHaveBeenCalledWith(1, 2);
+      expect(fn2).toHaveBeenCalledWith(1, 2);
+    });
+
+    it("should publish to dedicated channels and remove callbacks that subscribed once", function() {
+      // GIVEN
+      var fn1 = jasmine.createSpy('fn1');
+      var fn2 = jasmine.createSpy('fn2');
+
+      Backbone.Mediator.channels['foo'] = [
+        {
+          fn: fn1,
+          context: fn1,
+          once: false
+        },
+        {
+          fn: fn2,
+          context: fn2,
+          once: true
+        }
+      ];
+
+      // WHEN
+      var result = Backbone.Mediator.publish('foo', 1, 2);
+
+      // THEN
+      expect(result).toBe(Backbone.Mediator);
+      expect(fn1).toHaveBeenCalledWith(1, 2);
+      expect(fn2).toHaveBeenCalledWith(1, 2);
+      expect(Backbone.Mediator.channels['foo']).toEqual([{
+        fn: fn1,
+        context: fn1,
+        once: false
+      }]);
+    });
+
+    it("should subscribed once", function() {
+      // GIVEN
+      var fn1 = jasmine.createSpy('fn1');
+      Backbone.Mediator.channels['foo'] = [];
+
+      // WHEN
+      var result = Backbone.Mediator.subscribeOnce('foo', fn1, fn1);
+
+      // THEN
+      expect(result).toBe(Backbone.Mediator);
+      expect(Backbone.Mediator.channels['foo']).toEqual([{
+        fn: fn1,
+        context: fn1,
+        once: true
+      }]);
+    });
+
+    it("should have shortcuts to publish function", function() {
+      expect(Backbone.Mediator.pub).toBe(Backbone.Mediator.publish);
+    });
+
+    it("should have shortcuts to subscribe function", function() {
+      expect(Backbone.Mediator.sub).toBe(Backbone.Mediator.subscribe);
+    });
+  });
+
   describe("StrapView Test Suite", function() {
 
     it("should initialize an empty view", function() {
@@ -833,221 +1069,6 @@ describe("Backbone-Strap Test Suite", function() {
 
       view.undelegateEvents();
       expect(Backbone.Mediator.channels['foo']).toEqual([]);
-    });
-  });
-
-  describe("Backbone.Mediator Test Suite", function() {
-    it("should have a mediator initialized", function() {
-      // WHEN
-      var defaultsChannels = Backbone.Mediator.channels;
-
-      // THEN
-      expect(defaultsChannels).toEqual({});
-    });
-
-    it("should subscribe to a new channel", function() {
-      // GIVEN
-      var fn = jasmine.createSpy('fn');
-      var context = fn;
-
-      // WHEN
-      Backbone.Mediator.subscribe("foo", fn, fn);
-
-      // THEN
-      expect(Backbone.Mediator.channels['foo']).toBeDefined();
-      expect(Backbone.Mediator.channels['foo']).toEqual([
-        { fn: fn, context: context, once: false }
-      ]);
-    });
-
-    it("should clear subscriptions", function() {
-      // GIVEN
-      Backbone.Mediator.channels['foo'] = [
-        {
-          fn: jasmine.any(Function),
-          context: jasmine.any(Function),
-          once: false
-        }
-      ];
-
-      // WHEN
-      Backbone.Mediator.clear();
-
-      // THEN
-      expect(Backbone.Mediator.channels).toEqual({});
-    });
-
-    it("should subscribe twice to a new channel", function() {
-      // GIVEN
-      var fn1 = jasmine.createSpy('fn1');
-      var fn2 = jasmine.createSpy('fn2');
-      Backbone.Mediator.subscribe("foo", fn1, fn1);
-
-      // WHEN
-      Backbone.Mediator.subscribe("foo", fn2, fn2);
-
-      // THEN
-      expect(Backbone.Mediator.channels['foo']).toBeDefined();
-      expect(Backbone.Mediator.channels['foo']).toEqual([
-        { fn: fn1, context: fn1, once: false },
-        { fn: fn2, context: fn2, once: false }
-      ]);
-    });
-
-    it("should unsubscribe to channel", function() {
-      // GIVEN
-      var fn1 = jasmine.createSpy('fn1');
-      Backbone.Mediator.channels['foo'] = [
-        {
-          fn: fn1,
-          context: fn1,
-          once: false
-        }
-      ];
-
-      // WHEN
-      Backbone.Mediator.unsubscribe('foo');
-
-      // THEN
-      expect(Backbone.Mediator.channels['foo']).toEqual([]);
-    });
-
-    it("should unsubscribe everything if no argument is given", function() {
-      // GIVEN
-      var fn1 = jasmine.createSpy('fn1');
-      Backbone.Mediator.channels['foo'] = [
-        {
-          fn: fn1,
-          context: fn1,
-          once: false
-        }
-      ];
-
-      // WHEN
-      Backbone.Mediator.unsubscribe();
-
-      // THEN
-      expect(Backbone.Mediator.channels).toEqual({});
-    });
-
-    it("should unsubscribe a function of channel", function() {
-      // GIVEN
-      var fn1 = jasmine.createSpy('fn1');
-      Backbone.Mediator.channels['foo'] = [
-        {
-          fn: fn1,
-          context: fn1,
-          once: false
-        }
-      ];
-
-      // WHEN
-      Backbone.Mediator.unsubscribe('foo', fn1, fn1);
-
-      // THEN
-      expect(Backbone.Mediator.channels['foo']).toEqual([]);
-    });
-
-    it("should unsubscribe a function of channel and keep others", function() {
-      // GIVEN
-      var fn1 = jasmine.createSpy('fn1');
-      var fn2 = jasmine.createSpy('fn2');
-
-      Backbone.Mediator.channels['foo'] = [
-        {
-          fn: fn1,
-          context: fn1,
-          once: false
-        },
-        {
-          fn: fn2,
-          context: fn2,
-          once: false
-        }
-      ];
-
-      // WHEN
-      Backbone.Mediator.unsubscribe('foo', fn2, fn2);
-
-      // THEN
-      expect(Backbone.Mediator.channels['foo']).toEqual([{
-        fn: fn1,
-        context: fn1,
-        once: false
-      }]);
-    });
-
-    it("should publish to dedicated channels", function() {
-      // GIVEN
-      var fn1 = jasmine.createSpy('fn1');
-      var fn2 = jasmine.createSpy('fn2');
-
-      Backbone.Mediator.channels['foo'] = [
-        {
-          fn: fn1,
-          context: fn1,
-          once: false
-        },
-        {
-          fn: fn2,
-          context: fn2,
-          once: false
-        }
-      ];
-
-      // WHEN
-      Backbone.Mediator.publish('foo', 1, 2);
-
-      // THEN
-      expect(fn1).toHaveBeenCalledWith(1, 2);
-      expect(fn2).toHaveBeenCalledWith(1, 2);
-    });
-
-    it("should publish to dedicated channels and remove callbacks that subscribed once", function() {
-      // GIVEN
-      var fn1 = jasmine.createSpy('fn1');
-      var fn2 = jasmine.createSpy('fn2');
-
-      Backbone.Mediator.channels['foo'] = [
-        {
-          fn: fn1,
-          context: fn1,
-          once: false
-        },
-        {
-          fn: fn2,
-          context: fn2,
-          once: true
-        }
-      ];
-
-      // WHEN
-      Backbone.Mediator.publish('foo', 1, 2);
-
-      // THEN
-      expect(fn1).toHaveBeenCalledWith(1, 2);
-      expect(fn2).toHaveBeenCalledWith(1, 2);
-      expect(Backbone.Mediator.channels['foo']).toEqual([{
-        fn: fn1,
-        context: fn1,
-        once: false
-      }]);
-    });
-
-    it("should subscribed once", function() {
-      // GIVEN
-      var fn1 = jasmine.createSpy('fn1');
-      Backbone.Mediator.channels['foo'] = [];
-
-      // WHEN
-      Backbone.Mediator.subscribeOnce('foo', fn1, fn1);
-
-      // THEN
-      expect(Backbone.Mediator.channels['foo']).toEqual([{
-        fn: fn1,
-        context: fn1,
-        once: true
-      }]);
     });
   });
 

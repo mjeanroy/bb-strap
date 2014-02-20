@@ -146,12 +146,23 @@
     /** Channels */
     channels: {},
 
-    /** Clear all subscriptions. */
+    /**
+     * Clear all subscriptions.
+     * @return {object} this.
+     */
     clear: function() {
       Backbone.Mediator.channels = {};
+      return this;
     },
 
-    /** Subscribe to a channel */
+    /**
+     * Subscribe to a channel.
+     * @param {string} channel Channel name.
+     * @param {function} subscription Callback.
+     * @param {*=} context Optional context use on callbacks call.
+     * @param {boolean=} once Flag to subscribe only once (and remove subscription after first call).
+     * @return {object} this.
+     */
     subscribe: function(channel, subscription, context, once) {
       var channels = Backbone.Mediator.channels;
 
@@ -164,58 +175,75 @@
         context: context || this,
         once: once || false
       });
+
+      return this;
     },
 
-    /** Trigger all callbacks for a channel */
+    /**
+     * Trigger all callbacks for a channel.
+     * @param {string} channel Channel name.
+     * @return {object} this.
+     */
     publish: function(channel) {
       var channels = Backbone.Mediator.channels;
 
-      if (!channels[channel]) {
-        return;
-      }
+      if (channels[channel]) {
+        var args = [].slice.call(arguments, 1);
 
-      var args = [].slice.call(arguments, 1);
-
-      for (var i = 0; i < channels[channel].length; i++) {
-        var subscription = channels[channel][i];
-        subscription.fn.apply(subscription.context, args);
-        if (subscription.once) {
-          Backbone.Mediator.unsubscribe(channel, subscription.fn, subscription.context);
-          i--;
-        }
-      }
-    },
-
-    /** Cancel subscriptions */
-    unsubscribe: function(channel, fn, context) {
-      if (arguments.length === 0) {
-        Backbone.Mediator.clear();
-        return;
-      }
-
-      var channels = Backbone.Mediator.channels;
-
-      if (!channels[channel]) {
-        return;
-      }
-
-      if (arguments.length === 1) {
-        channels[channel] = [];
-      }
-      else {
         for (var i = 0; i < channels[channel].length; i++) {
           var subscription = channels[channel][i];
-          if (subscription.fn === fn && (!context || subscription.context === context)) {
-            channels[channel].splice(i, 1);
+          subscription.fn.apply(subscription.context, args);
+          if (subscription.once) {
+            Backbone.Mediator.unsubscribe(channel, subscription.fn, subscription.context);
             i--;
           }
         }
       }
+
+      return this;
     },
 
-    /** Subscribe to a channel for one event */
+    /**
+     * Cancel subscriptions.
+     * @param {string=} channel Channel name to un subscribe.
+     * @param {function=} fn Callback to un subscribe.
+     * @param {*=} context Context to match on subscription.
+     * @return {object} this
+     */
+    unsubscribe: function(channel, fn, context) {
+      if (arguments.length === 0) {
+        return Backbone.Mediator.clear();
+      }
+
+      var channels = Backbone.Mediator.channels;
+
+      if (channels[channel]) {
+        if (arguments.length === 1) {
+          channels[channel] = [];
+        }
+        else {
+          for (var i = 0; i < channels[channel].length; i++) {
+            var subscription = channels[channel][i];
+            if (subscription.fn === fn && (!context || subscription.context === context)) {
+              channels[channel].splice(i, 1);
+              i--;
+            }
+          }
+        }
+      }
+
+      return this;
+    },
+
+    /**
+     * Subscribe to a channel for one event.
+     * @param {string} channel Channel name.
+     * @param {function=} subscription Callback.
+     * @param {object=} context Callback context.
+     * @return {object} this.
+     */
     subscribeOnce: function(channel, subscription, context) {
-      Backbone.Mediator.subscribe(channel, subscription, context, true);
+      return Backbone.Mediator.subscribe(channel, subscription, context, true);
     }
   };
 
