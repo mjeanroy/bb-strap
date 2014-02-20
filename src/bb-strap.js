@@ -276,10 +276,13 @@
       that.url = location.protocol + '//' + location.host + location.pathname;
 
       var args = [].slice.call(arguments, 0);
+
       that.preInit.apply(that, args);
       that.views = that.buildViews();
       that.router = that.buildRouter();
       that.onInit.apply(that, args);
+
+      return that;
     },
 
     /** Hook initialization (before views and router are built) */
@@ -303,17 +306,22 @@
       'click .js-link': 'nav'
     },
 
-    /** App navigation */
+    /**
+     * Link navigation.
+     * @param {Event} e Click event.
+     * @return {object} this
+     */
     nav: function(e) {
       e.preventDefault();
       var href = $(e.currentTarget).attr('href');
-      this.navigate(href);
+      return this.navigate(href);
     },
 
     /**
      * Navigate to a new url using app router.
      * @param {string} hash Url to navigate to.
      * @param {boolean?} trigger If navigation must triggered event to change main view.
+     * @return {object} this
      */
     navigate: function(hash, trigger) {
       var router = this.router;
@@ -329,20 +337,34 @@
           trigger: trigger
         });
       }
+      return this;
     },
 
-    /** Clear current view */
+    /**
+     * Clear current view and open new one.
+     * @param {object} ViewImpl New view class.
+     * @param {object=} opts Optional view options.
+     * @return {object} this
+     */
     replaceCurrentView: function(ViewImpl, opts) {
-      if (this.views.current && this.views.current.clear) {
-        this.views.current.clear();
+      var current = this.views.current;
+      if (current && _.isFunction(current.clear)) {
+        current.clear();
         delete this.views.current;
       }
+
       this.views.current = new ViewImpl(opts);
+      return this;
     },
 
-    /** Scroll to given y */
+    /**
+     * Scroll to given y.
+     * @param {number=} y Y coordinate (optional, default is zero).
+     * @return {object} this
+     */
     scrollTop: function(y) {
       this.$window.scrollTop(y || 0);
+      return this;
     }
   });
 

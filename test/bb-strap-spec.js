@@ -353,6 +353,153 @@ describe("Backbone-Strap Test Suite", function() {
     });
   });
 
+  describe("App Test Suite", function() {
+    afterEach(function() {
+      delete window.app;
+    });
+
+    it("should initialize app object", function() {
+      // GIVEN
+      spyOn(Backbone.App.prototype, 'preInit').andCallThrough();
+      spyOn(Backbone.App.prototype, 'onInit').andCallThrough();
+
+      // WHEN
+      var app = new Backbone.App();
+
+      // THEN
+      expect(window.app).toBe(app);
+      expect(app.preInit).toHaveBeenCalled();
+      expect(app.onInit).toHaveBeenCalled();
+
+      expect(app.$window).toBeDefined();
+      expect(app.$body).toBeDefined();
+      expect(app.$html).toBeDefined();
+
+      expect(app.$html.addClass).toHaveBeenCalledWith('js');
+      expect(app.$html.removeClass).toHaveBeenCalledWith('no-js');
+
+      expect(app.events).toBeDefined();
+      expect(app.events['click .js-link']).toEqual('nav');
+
+      expect(app.views).toEqual({});
+      expect(app.router).toBe(null);
+    });
+
+    it("should navigate when user click on a link", function() {
+      // GIVEN
+      var e = jasmine.createSpyObj('Event', ['preventDefault']);
+      e.currentTarget = $('<a href="http://localhost/foo"/>');
+
+      var app = new Backbone.App();
+      app.url = 'http://localhost';
+      app.router = jasmine.createSpyObj('router', ['navigate']);
+
+      // WHEN
+      var result = app.nav(e);
+
+      // THEN
+      expect(result).toBe(app);
+      expect(e.preventDefault).toHaveBeenCalled();
+      app.navigate('http://localhost/foo');
+      expect(app.router.navigate).toHaveBeenCalledWith('/foo', {
+        trigger: true
+      });
+    });
+
+    it("should navigate", function() {
+      // GIVEN
+      var app = new Backbone.App();
+      app.url = 'http://localhost';
+      app.router = jasmine.createSpyObj('router', ['navigate']);
+
+      // WHEN
+      var result = app.navigate('http://localhost/foo');
+
+      // THEN
+      expect(result).toBe(app);
+      expect(app.router.navigate).toHaveBeenCalledWith('/foo', {
+        trigger: true
+      });
+    });
+
+    it("should navigate and don't trigger events", function() {
+      // GIVEN
+      var app = new Backbone.App();
+      app.url = 'http://localhost';
+      app.router = jasmine.createSpyObj('router', ['navigate']);
+
+      // WHEN
+      var result = app.navigate('http://localhost/foo', false);
+
+      // THEN
+      expect(result).toBe(app);
+      expect(app.router.navigate).toHaveBeenCalledWith('/foo', {
+        trigger: false
+      });
+    });
+
+    it("should add new view", function() {
+      // GIVEN
+      var app = new Backbone.App();
+
+      var View = jasmine.createSpy('view');
+      var opts = jasmine.createSpy('opts');
+
+      // WHEN
+      var result = app.replaceCurrentView(View);
+
+      // THEN
+      expect(result).toBe(app);
+      expect(app.views.current).toBeDefined();
+      expect(app.views.current instanceof View).toBe(true);
+    });
+
+    it("should replace current view", function() {
+      // GIVEN
+      var app = new Backbone.App();
+
+      var oldView = jasmine.createSpyObj('oldView', ['clear']);
+      app.views.current = oldView;
+
+      var View = jasmine.createSpy('view');
+      var opts = jasmine.createSpy('opts');
+
+      // WHEN
+      var result = app.replaceCurrentView(View);
+
+      // THEN
+      expect(result).toBe(app);
+      expect(oldView.clear).toHaveBeenCalled();
+      expect(app.views.current).toBeDefined();
+      expect(app.views.current instanceof View).toBe(true);
+    });
+
+    it("should initialize scroll top", function() {
+      // GIVEN
+      var app = new Backbone.App();
+      spyOn(app.$window, 'scrollTop');
+
+      // WHEN
+      app.scrollTop();
+
+      // THEN
+      expect(app.$window.scrollTop).toHaveBeenCalledWith(0);
+    });
+
+    it("should initialize scroll top with y value", function() {
+      // GIVEN
+      var app = new Backbone.App();
+      spyOn(app.$window, 'scrollTop');
+
+      // WHEN
+      var result = app.scrollTop(10);
+
+      // THEN
+      expect(result).toBe(app);
+      expect(app.$window.scrollTop).toHaveBeenCalledWith(10);
+    });
+  });
+
   describe("StrapView Test Suite", function() {
 
     it("should initialize an empty view", function() {
@@ -1069,148 +1216,6 @@ describe("Backbone-Strap Test Suite", function() {
 
       view.undelegateEvents();
       expect(Backbone.Mediator.channels['foo']).toEqual([]);
-    });
-  });
-
-  describe("App Test Suite", function() {
-    afterEach(function() {
-      delete window.app;
-    });
-
-    it("should initialize app object", function() {
-      // GIVEN
-      spyOn(Backbone.App.prototype, 'preInit').andCallThrough();
-      spyOn(Backbone.App.prototype, 'onInit').andCallThrough();
-
-      // WHEN
-      var app = new Backbone.App();
-
-      // THEN
-      expect(window.app).toBe(app);
-
-      expect(app.preInit).toHaveBeenCalled();
-      expect(app.onInit).toHaveBeenCalled();
-
-      expect(app.$window).toBeDefined();
-      expect(app.$body).toBeDefined();
-      expect(app.$html).toBeDefined();
-
-      expect(app.$html.addClass).toHaveBeenCalledWith('js');
-      expect(app.$html.removeClass).toHaveBeenCalledWith('no-js');
-
-      expect(app.events).toBeDefined();
-      expect(app.events['click .js-link']).toEqual('nav');
-
-      expect(app.views).toEqual({});
-      expect(app.router).toBe(null);
-    });
-
-    it("should navigate when user click on a link", function() {
-      // GIVEN
-      var e = jasmine.createSpyObj('Event', ['preventDefault']);
-      e.currentTarget = $('<a href="http://localhost/foo"/>');
-
-      var app = new Backbone.App();
-      app.url = 'http://localhost';
-      app.router = jasmine.createSpyObj('router', ['navigate']);
-
-      // WHEN
-      app.nav(e);
-
-      // THEN
-      expect(e.preventDefault).toHaveBeenCalled();
-      app.navigate('http://localhost/foo');
-      expect(app.router.navigate).toHaveBeenCalledWith('/foo', {
-        trigger: true
-      });
-    });
-
-    it("should navigate", function() {
-      // GIVEN
-      var app = new Backbone.App();
-      app.url = 'http://localhost';
-      app.router = jasmine.createSpyObj('router', ['navigate']);
-
-      // WHEN
-      app.navigate('http://localhost/foo');
-
-      // THEN
-      expect(app.router.navigate).toHaveBeenCalledWith('/foo', {
-        trigger: true
-      });
-    });
-
-    it("should navigate and don't trigger events", function() {
-      // GIVEN
-      var app = new Backbone.App();
-      app.url = 'http://localhost';
-      app.router = jasmine.createSpyObj('router', ['navigate']);
-
-      // WHEN
-      app.navigate('http://localhost/foo', false);
-
-      // THEN
-      expect(app.router.navigate).toHaveBeenCalledWith('/foo', {
-        trigger: false
-      });
-    });
-
-    it("should add new view", function() {
-      // GIVEN
-      var app = new Backbone.App();
-
-      var View = jasmine.createSpy('view');
-      var opts = jasmine.createSpy('opts');
-
-      // WHEN
-      app.replaceCurrentView(View);
-
-      // THEN
-      expect(app.views.current).toBeDefined();
-      expect(app.views.current instanceof View).toBe(true);
-    });
-
-    it("should replace current view", function() {
-      // GIVEN
-      var app = new Backbone.App();
-
-      var oldView = jasmine.createSpyObj('oldView', ['clear']);
-      app.views.current = oldView;
-
-      var View = jasmine.createSpy('view');
-      var opts = jasmine.createSpy('opts');
-
-      // WHEN
-      app.replaceCurrentView(View);
-
-      // THEN
-      expect(oldView.clear).toHaveBeenCalled();
-      expect(app.views.current).toBeDefined();
-      expect(app.views.current instanceof View).toBe(true);
-    });
-
-    it("should initialize scroll top", function() {
-      // GIVEN
-      var app = new Backbone.App();
-      spyOn(app.$window, 'scrollTop');
-
-      // WHEN
-      app.scrollTop();
-
-      // THEN
-      expect(app.$window.scrollTop).toHaveBeenCalledWith(0);
-    });
-
-    it("should initialize scroll top with y value", function() {
-      // GIVEN
-      var app = new Backbone.App();
-      spyOn(app.$window, 'scrollTop');
-
-      // WHEN
-      app.scrollTop(10);
-
-      // THEN
-      expect(app.$window.scrollTop).toHaveBeenCalledWith(10);
     });
   });
 
