@@ -709,7 +709,7 @@ describe("Backbone-Strap Test Suite", function() {
       };
 
       // WHEN
-      var result = view.clearCache();
+      var result = view.$clear();
 
       // THEN
       expect(result).toBe(view);
@@ -721,7 +721,7 @@ describe("Backbone-Strap Test Suite", function() {
       view.$cache['#foo'] = $('<div></div>');
 
       spyOn(view, 'onDispose').andCallThrough();
-      spyOn(view, 'clearCache').andCallThrough();
+      spyOn(view, '$clear').andCallThrough();
       spyOn(view, 'closeSubviews').andCallThrough();
       spyOn(view, 'stopListening').andCallThrough();
       spyOn(view, 'undelegateEvents').andCallThrough();
@@ -734,7 +734,7 @@ describe("Backbone-Strap Test Suite", function() {
       expect(result).toBe(view);
       expect(view.$cache).toEqual({});
       expect(view.onDispose).toHaveBeenCalled();
-      expect(view.clearCache).toHaveBeenCalled();
+      expect(view.$clear).toHaveBeenCalled();
       expect(view.closeSubviews).toHaveBeenCalled();
       expect(view.stopListening).toHaveBeenCalled();
       expect(view.undelegateEvents).toHaveBeenCalled();
@@ -1267,7 +1267,7 @@ describe("Backbone-Strap Test Suite", function() {
       };
 
       spyOn(view, 'preRender');
-      spyOn(view, 'clearCache').andReturn(view);
+      spyOn(view, '$clear').andReturn(view);
       spyOn(view, 'hideLoader').andReturn(view);
       spyOn(view, 'onReady');
       spyOn(view, 'closeSubviews').andReturn(view);
@@ -1279,7 +1279,7 @@ describe("Backbone-Strap Test Suite", function() {
       // THEN
       expect(result).toBe(view);
       expect(result.preRender).toHaveBeenCalled();
-      expect(result.clearCache).toHaveBeenCalled();
+      expect(result.$clear).toHaveBeenCalled();
       expect(result.hideLoader).toHaveBeenCalled();
       expect(result.closeSubviews).toHaveBeenCalled();
       expect(result.onReady).toHaveBeenCalled();
@@ -1323,7 +1323,7 @@ describe("Backbone-Strap Test Suite", function() {
       spyOn(Backbone.StrapView.prototype, 'onLoaded').andCallThrough();
       spyOn(Backbone.StrapView.prototype, 'populate').andCallThrough();
       spyOn(Backbone.StrapView.prototype, 'preRender').andCallThrough();
-      spyOn(Backbone.StrapView.prototype, 'clearCache').andCallThrough();
+      spyOn(Backbone.StrapView.prototype, '$clear').andCallThrough();
       spyOn(Backbone.StrapView.prototype, 'closeSubviews').andCallThrough();
       spyOn(Backbone.StrapView.prototype, '$partials').andCallThrough();
 
@@ -1362,7 +1362,7 @@ describe("Backbone-Strap Test Suite", function() {
       });
 
       expect(view.preRender).toHaveBeenCalled();
-      expect(view.clearCache).toHaveBeenCalled();
+      expect(view.$clear).toHaveBeenCalled();
       expect(view.closeSubviews).toHaveBeenCalled();
     });
 

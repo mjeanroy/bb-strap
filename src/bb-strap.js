@@ -586,7 +586,7 @@
      * Clear internal cache.
      * @return {object} this
      */
-    clearCache: function() {
+    $clear: function() {
       this.$cache = {};
       return this;
     },
@@ -667,7 +667,7 @@
     dispose: function() {
       var that = this;
       that.onDispose();
-      that.clearCache();
+      that.$clear();
       that.closeSubviews();
       that.stopListening();
       that.undelegateEvents();
@@ -775,7 +775,7 @@
           .preRender();
 
       // Hide loader and render
-      that.clearCache()
+      that.$clear()
           .hideLoader();
 
       that.$el.html(html);
