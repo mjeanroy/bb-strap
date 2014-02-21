@@ -1,0 +1,50 @@
+# BackboneStrap
+
+Bootstrap your backbone application using BackboneStrap.
+
+BackboneStrap is a set of common practices I use on my Backbone applications.
+
+## App
+Use Backbone.App to initialize your main application with:
+
+- A ```navigate``` function used to trigger page change using application router if available.
+- A handler for javascript links: add ```js-link``̀  css to your links and it will trigger a page change with href value.
+
+Following methods should be overriden with your own logic:
+
+- ```buildRouter``` Must return the router that will be used within your application.
+
+
+## Router
+
+Use Backbone.StrapApp to initialize .
+
+```javascript
+var Router = Backbone.StrapRouter.extend({
+    routes: {
+        'index': 'index'
+    },
+
+    index: function() {
+        this.show(HomeView);
+    }
+});
+```
+
+Backbone.history is automatically started at router initialization with following settings:
+- silent = false : By default, first url trigger associated router.
+- pushState = true : By default, your backbone application will use pushState api.
+
+Note that a new function (`show`) is added on your router.
+
+This function will allow you to display new view in a DOM area.
+
+By default, the selector is '#content' but it can be overriden when your router is created.
+
+```javascript
+var myRouter = new Router({
+    content: '#my-app',
+    silent: true,
+    pushState: false
+});
+```
