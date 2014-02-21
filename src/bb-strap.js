@@ -33,7 +33,7 @@
     factory(jQuery, _, Backbone, window.Mustache || null);
   }
 
-}(function($, _, Backbone) {
+}(function($, _, Backbone, Mustache) {
 
   'use strict';
 
