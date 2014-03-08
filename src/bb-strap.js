@@ -37,6 +37,10 @@
 
   'use strict';
 
+  var BackboneView = Backbone.View.prototype;
+  var BackboneCollection = Backbone.Collection.prototype;
+  var BackboneRouter = Backbone.Router.prototype;
+
   var noop = function() {
   };
 
@@ -249,7 +253,7 @@
     el: 'body',
 
     /** App initialization */
-    initialize: function() {
+    constructor: function() {
       var that = this;
 
       // Expose app
@@ -267,14 +271,13 @@
       var location = window.location;
       that.url = location.protocol + '//' + location.host + location.pathname;
 
-      var args = [].slice.call(arguments, 0);
+      BackboneView.constructor.call(that);
 
+      var args = [].slice.call(arguments, 0);
       that.preInit.apply(that, args);
       that.views = that.buildViews();
       that.router = that.buildRouter();
       that.onInit.apply(that, args);
-
-      return that;
     },
 
     /** Hook initialization (before views and router are built) */
@@ -367,19 +370,22 @@
      * @param {object=} options Optional options.
      * @returns {object} this.
      */
-    initialize: function(options) {
+    constructor: function(options) {
       // Main content
       var opts = options || {};
       var content = opts.content || '#content';
       this.$content = $(content);
 
-      var defaults = {
-        silent: false,
-        pushState: true
-      };
+      BackboneRouter.constructor.call(this);
 
-      Backbone.history.start(_.extend(defaults, _.pick(opts, 'silent', 'pushState')));
-      return this;
+      if (!Backbone.history.started) {
+        var defaults = {
+          silent: false,
+          pushState: true
+        };
+
+        Backbone.history.start(_.extend(defaults, _.pick(opts, 'silent', 'pushState')));
+      }
     },
 
     /**
@@ -399,27 +405,35 @@
 
   Backbone.StrapView = Backbone.View.extend({
 
-    /** Initialize view. */
-    initialize: function(options) {
+    /**
+     * Initialize view.
+     * @param {*=} options Optional view options.
+     */
+    constructor: function(options) {
       var that = this;
-
-      that.templateManager = Backbone.templateManager;
 
       var opts = options || {};
       _.each(opts, function(value, key) {
         that[key] = value;
       });
 
+      // Initialize jQuery cache elements
       that.$cache = {};
+
+      // Initialize map of subviews
       that.$subviews = {};
+
+      // Shortcut to template manager
+      that.templateManager = Backbone.templateManager;
+
+      BackboneView.constructor.call(that, opts);
 
       var args = [].slice.call(arguments, 0);
       if (!args || !args.length) {
-        args = [
-          {}
-        ];
+        args = [{}];
       }
 
+      // Shortcut to initialize
       that.onInit.apply(that, args);
 
       if (that.isEmpty()) {
@@ -443,7 +457,7 @@
      * @override
      */
     delegateEvents: function() {
-      Backbone.View.prototype.delegateEvents.apply(this, [].slice.call(arguments, 0));
+      BackboneView.delegateEvents.apply(this, [].slice.call(arguments, 0));
       return this.setSubscriptions();
     },
 
@@ -453,7 +467,7 @@
      * @override
      */
     undelegateEvents: function() {
-      Backbone.View.prototype.undelegateEvents.apply(this, [].slice.call(arguments, 0));
+      BackboneView.undelegateEvents.apply(this, [].slice.call(arguments, 0));
       return this.unsetSubscriptions();
     },
 
@@ -921,23 +935,20 @@
   Backbone.PaginatedCollection = Backbone.Collection.extend({
 
     /** Initialize collection */
-    initialize: function(models, options) {
+    constructor: function(models, options) {
       var opts = options || {};
-      var that = this;
-      that.page = opts.page || 0;
-      that.pageSize = opts.pageSize || 10;
 
       var total = opts.total;
       if (_.isNull(total) || _.isUndefined(total)) {
         total = Number.MAX_VALUE;
       }
-      this.total = total;
 
-      that.onInit.apply(that, [].slice.call(arguments, 0));
-    },
+      var that = this;
+      that.total = total;
+      that.page = opts.page || 0;
+      that.pageSize = opts.pageSize || 10;
 
-    /** Initialization hook */
-    onInit: function() {
+      BackboneCollection.constructor.apply(that, arguments);
     },
 
     /** Get id of last item of collection */
