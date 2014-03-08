@@ -777,12 +777,12 @@
       var html = that.toHtml.apply(that, args);
 
       // Close dom elements before rendering
-      that.closeSubviews()
-          .preRender();
+      that.closeSubviews();
+      that.preRender();
 
       // Hide loader and render
-      that.$clear()
-          .hideLoader();
+      that.$clear();
+      that.hideLoader();
 
       that.$el.html(html);
 
