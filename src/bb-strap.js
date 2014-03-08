@@ -27,7 +27,7 @@
 
   if (typeof define === 'function' && define.amd) {
     // AMD. Register as an anonymous module.
-    define(['jquery', 'underscore', 'backbone', 'Mustache'], factory);
+    define(['jquery', 'underscore', 'backbone', 'mustache'], factory);
   } else {
     // Browser globals
     factory(jQuery, _, Backbone, window.Mustache || null);
