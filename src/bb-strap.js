@@ -40,14 +40,6 @@
   var noop = function() {
   };
 
-  Backbone.Helpers = {
-    noop: noop,
-
-    identity: function(params) {
-      return params;
-    }
-  };
-
   Backbone.TemplateManager = function() {
     this.$cache = {};
     this.prefix = '/templates/';
