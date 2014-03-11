@@ -9,15 +9,16 @@ Use Backbone.App to initialize your main application with:
 
 - A ```navigate``` function used to trigger page change using application router if available.
 - A handler for javascript links: add ```js-link``̀  css to your links and it will trigger a page change with href value.
+- A ```scrollTop``` function that can be used to scroll navigator to a specified y position (optional, default will be zero).
 
-Following methods should be overriden with your own logic:
+Following methods are no-op functions and may be overriden with your own logic:
 
-- ```buildRouter``` Must return the router that will be used within your application.
-
+- ```buildRouter```
+- ```buildViews```
 
 ## Router
 
-Use Backbone.StrapApp to initialize .
+Use a pre-configured router to initialize your history and define the main content of your single page application.
 
 ```javascript
 var Router = Backbone.StrapRouter.extend({
@@ -32,14 +33,10 @@ var Router = Backbone.StrapRouter.extend({
 ```
 
 Backbone.history is automatically started at router initialization with following settings:
-- silent = false : By default, first url trigger associated router.
-- pushState = true : By default, your backbone application will use pushState api.
+- ```silent = false``` : By default, first url trigger associated router.
+- ```pushState = true``` : By default, your backbone application will use pushState api.
 
-Note that a new function (`show`) is added on your router.
-
-This function will allow you to display new view in a DOM area.
-
-By default, the selector is '#content' but it can be overriden when your router is created.
+Note that a new function (`show`) is added on your router. This function will replace main content with a new view. By default, new view will be appended to ```#content``` element but you can define your own selector at router initialization:
 
 ```javascript
 var myRouter = new Router({
@@ -48,3 +45,14 @@ var myRouter = new Router({
     pushState: false
 });
 ```
+
+## Views
+Use a pre-configured view with new functions used to :
+- Close views (and deallocate memory)
+- Manage subviews
+- Use a jQuery cache
+
+Following are added to your views:
+
+```isEmpty``` : Check if view is empty.
+```$c```
