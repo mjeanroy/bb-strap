@@ -379,6 +379,7 @@ describe("Backbone-Strap Test Suite", function() {
 
       expect(app.$window).toBeDefined();
       expect(app.$body).toBeDefined();
+      expect(app.$document).toBeDefined();
       expect(app.$html).toBeDefined();
 
       expect(app.$html.addClass).toHaveBeenCalledWith('js');
