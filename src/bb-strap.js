@@ -54,7 +54,7 @@
     this.$cache = {};
     this.prefix = '/templates/';
     this.suffix = '.template.html';
-    this.initialize.apply(this, [].slice.call(arguments, 0));
+    this.initialize.apply(this, arguments);
   };
 
   Backbone.TemplateManager.prototype = {
@@ -954,7 +954,75 @@
     }
   });
 
-  Backbone.PaginatedCollection = Backbone.Collection.extend({
+  Backbone.StrapCollection = Backbone.Collection.extend({
+    /**
+     * Collection constructor.
+     * @param {array=} models Array of models.
+     * @param {object=} options Collection options.
+     */
+    constructor: function(models, options) {
+      var that = this;
+      that.$fetching = false;
+
+      var opts = options || {};
+      _.each(opts, function(value, key) {
+        that[key] = value;
+      });
+
+      BackboneCollection.constructor.apply(that, arguments);
+    },
+
+    /**
+     * Fetch collection.
+     * If fetching is already in progress, sync operation will not be triggered and null
+     * will be returned.
+     * @param {object=} options Fetch options.
+     * @return {*} jqXHR or null if sync operation is alreay in progress.
+     */
+    fetch: function(options) {
+      var that = this;
+      var result = NULL;
+      if (!that.$fetching || options.force) {
+        that.$fetching = true;
+
+        var settings = options || {};
+        var success = settings.success;
+        var error = settings.error;
+        var complete = settings.complete;
+
+        var onComplete = function(collection, response, options) {
+          if (complete) {
+            complete(collection, response, options);
+          }
+
+          that.$fetching = false;
+
+          // Prevent memory leak
+          settings = success = error = complete = onComplete = NULL;
+        };
+
+        var callback = function(fn, collection, response, options) {
+          if (fn) {
+            fn(collection, response, options);
+          }
+          onComplete(collection, response, options);
+        };
+
+        settings.success = function(collection, response, options) {
+          callback(success, collection, response, options);
+        };
+
+        settings.error = function(collection, response, options) {
+          callback(error, collection, response, options);
+        };
+
+        result = BackboneCollection.fetch.call(that, settings);
+      }
+      return result;
+    }
+  });
+
+  Backbone.PaginatedCollection = Backbone.StrapCollection.extend({
 
     /** Initialize collection */
     constructor: function(models, options) {
@@ -1114,21 +1182,22 @@
           that[flagName] = FALSE;
 
           // Prevent memory leak
-          settings = success = error = onComplete = NULL;
+          settings = success = error = complete = onComplete = NULL;
+        };
+
+        var callback = function(fn, model, response, options) {
+          if (fn) {
+            fn(model, response, options);
+          }
+          onComplete(model, response, options);
         };
 
         settings.success = function(model, response, options) {
-          if (success) {
-            success(model, response, options);
-          }
-          onComplete(model, response, options);
+          callback(success, model, response, options);
         };
 
         settings.error = function(model, response, options) {
-          if (error) {
-            error(model, response, options);
-          }
-          onComplete(model, response, options);
+          callback(error, model, response, options);
         };
 
         var args = [settings];

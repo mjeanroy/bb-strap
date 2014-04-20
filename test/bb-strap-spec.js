@@ -1855,6 +1855,174 @@ describe("Backbone-Strap Test Suite", function() {
     });
   });
 
+  describe("StrapCollection Test Suite", function() {
+    beforeEach(function() {
+      this.xhr = jasmine.createSpyObj('xhr', ['done', 'fail', 'always']);
+      spyOn($, 'ajax').andReturn(this.xhr);
+    });
+
+    it("should initialize a collection with flags equal to false", function() {
+      // WHEN
+      var collection = new Backbone.StrapCollection();
+
+      // THEN
+      expect(collection.$fetching).toBe(false);
+    });
+
+    it("should initialize a collection with given options", function() {
+      // GIVEN
+      var options = {
+        foobar: 'hello world',
+        foo: 'bar'
+      };
+
+      // WHEN
+      var collection = new Backbone.StrapCollection({}, options);
+
+      // THEN
+      expect(collection.foobar).toBe(options.foobar);
+      expect(collection.foo).toBe(options.foo);
+    });
+
+    it("should fetch collection and update flags", function() {
+      // GIVEN
+      var collection = new Backbone.StrapCollection([], {
+        url: '/foo'
+      });
+
+      // WHEN
+      var jqXhr = collection.fetch();
+
+      // THEN
+      expect(jqXhr).toBe(this.xhr);
+      expect($.ajax).toHaveBeenCalled();
+      expect(collection.$fetching).toBe(true);
+
+      var xhr = $.ajax.mostRecentCall.args[0];
+      expect(xhr.url).toBe('/foo');
+      expect(xhr.type).toBe('GET');
+      expect(xhr.success).toEqual(jasmine.any(Function));
+      expect(xhr.error).toEqual(jasmine.any(Function));
+
+      // Trigger success
+      var id = 1;
+      xhr.success([{id: id}]);
+      expect(collection.$fetching).toBe(false);
+      expect(collection.length).toBe(1);
+    });
+
+    it("should fetch collection, update flags and trigger original success", function() {
+      // GIVEN
+      var success = jasmine.createSpy('success');
+      var complete = jasmine.createSpy('complete');
+      var collection = new Backbone.StrapCollection([], {
+        url: '/foo'
+      });
+
+      var options = {
+        success: success,
+        complete: complete
+      };
+
+      // WHEN
+      var jqXhr = collection.fetch(options);
+
+      // THEN
+      expect(jqXhr).toBe(this.xhr);
+      expect($.ajax).toHaveBeenCalled();
+      expect(collection.$fetching).toBe(true);
+      expect(success).not.toHaveBeenCalled();
+      expect(complete).not.toHaveBeenCalled();
+
+      var xhr = $.ajax.mostRecentCall.args[0];
+      expect(xhr.url).toBe('/foo');
+      expect(xhr.type).toBe('GET');
+      expect(xhr.success).toEqual(jasmine.any(Function));
+      expect(xhr.error).toEqual(jasmine.any(Function));
+
+      // Trigger success
+      var id = 1;
+      var response = [{
+        id: id
+      }];
+
+      xhr.success(response);
+
+      expect(success).toHaveBeenCalledWith(collection, response, jasmine.any(Object));
+      expect(complete).toHaveBeenCalledWith(collection, response, jasmine.any(Object));
+      expect(collection.$fetching).toBe(false);
+      expect(collection.length).toBe(1);
+    });
+
+    it("should fetch collection, update flags and trigger original error", function() {
+      // GIVEN
+      var error = jasmine.createSpy('error');
+      var complete = jasmine.createSpy('complete');
+      var collection = new Backbone.StrapCollection([], {
+        url: '/foo'
+      });
+
+      var options = {
+        error: error,
+        complete: complete
+      };
+
+      // WHEN
+      var jqXhr = collection.fetch(options);
+
+      // THEN
+      expect(jqXhr).toBe(this.xhr);
+      expect($.ajax).toHaveBeenCalled();
+      expect(collection.$fetching).toBe(true);
+      expect(error).not.toHaveBeenCalled();
+      expect(complete).not.toHaveBeenCalled();
+
+      var xhr = $.ajax.mostRecentCall.args[0];
+      expect(xhr.url).toBe('/foo');
+      expect(xhr.type).toBe('GET');
+      expect(xhr.success).toEqual(jasmine.any(Function));
+      expect(xhr.error).toEqual(jasmine.any(Function));
+
+      // Trigger success
+      var response = {
+        status: 400
+      };
+
+      xhr.error(response);
+
+      expect(error).toHaveBeenCalledWith(collection, response, jasmine.any(Object));
+      expect(complete).toHaveBeenCalledWith(collection, response, jasmine.any(Object));
+      expect(collection.$fetching).toBe(false);
+    });
+
+    it("should not fetch collection if a fetching is already in progress", function() {
+      // GIVEN
+      var success = jasmine.createSpy('success');
+      var complete = jasmine.createSpy('complete');
+      var collection = new Backbone.StrapCollection([], {
+        url: '/foo'
+      });
+
+      collection.$fetching = true;
+
+      var options = {
+        success: success,
+        complete: complete
+      };
+
+      // WHEN
+      var jqXhr = collection.fetch(options);
+
+      // THEN
+      expect(jqXhr).toBe(null);
+      expect($.ajax).not.toHaveBeenCalled();
+      expect(collection.$fetching).toBe(true);
+      expect(collection.length).toBe(0);
+      expect(success).not.toHaveBeenCalled();
+      expect(complete).not.toHaveBeenCalled();
+    });
+  });
+
   describe("PaginatedCollection Test Suite", function() {
     beforeEach(function() {
       spyOn($, 'ajax');
