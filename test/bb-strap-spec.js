@@ -1476,12 +1476,14 @@ describe("Backbone-Strap Test Suite", function() {
     it("should fetch model, update flags and trigger original success", function() {
       // GIVEN
       var success = jasmine.createSpy('success');
+      var complete = jasmine.createSpy('complete');
       var model = new Backbone.StrapModel({}, {
         urlRoot: '/foo'
       });
 
       var options = {
-        success: success
+        success: success,
+        complete: complete
       };
 
       // WHEN
@@ -1492,6 +1494,7 @@ describe("Backbone-Strap Test Suite", function() {
       expect($.ajax).toHaveBeenCalled();
       expect(model.$fetching).toBe(true);
       expect(success).not.toHaveBeenCalled();
+      expect(complete).not.toHaveBeenCalled();
 
       var xhr = $.ajax.mostRecentCall.args[0];
       expect(xhr.url).toBe('/foo');
@@ -1508,6 +1511,7 @@ describe("Backbone-Strap Test Suite", function() {
       xhr.success(response);
 
       expect(success).toHaveBeenCalledWith(model, response, jasmine.any(Object));
+      expect(complete).toHaveBeenCalledWith(model, response, jasmine.any(Object));
       expect(model.$fetching).toBe(false);
       expect(model.get('id')).toBe(id);
     });
@@ -1515,12 +1519,14 @@ describe("Backbone-Strap Test Suite", function() {
     it("should fetch model, update flags and trigger original error", function() {
       // GIVEN
       var error = jasmine.createSpy('error');
+      var complete = jasmine.createSpy('complete');
       var model = new Backbone.StrapModel({}, {
         urlRoot: '/foo'
       });
 
       var options = {
-        error: error
+        error: error,
+        complete: complete
       };
 
       // WHEN
@@ -1531,6 +1537,7 @@ describe("Backbone-Strap Test Suite", function() {
       expect($.ajax).toHaveBeenCalled();
       expect(model.$fetching).toBe(true);
       expect(error).not.toHaveBeenCalled();
+      expect(complete).not.toHaveBeenCalled();
 
       var xhr = $.ajax.mostRecentCall.args[0];
       expect(xhr.url).toBe('/foo');
@@ -1546,12 +1553,14 @@ describe("Backbone-Strap Test Suite", function() {
       xhr.error(response);
 
       expect(error).toHaveBeenCalledWith(model, response, jasmine.any(Object));
+      expect(complete).toHaveBeenCalledWith(model, response, jasmine.any(Object));
       expect(model.$fetching).toBe(false);
     });
 
     it("should not fetch model if a fetching is already in progress", function() {
       // GIVEN
       var success = jasmine.createSpy('success');
+      var complete = jasmine.createSpy('complete');
       var model = new Backbone.StrapModel({}, {
         urlRoot: '/foo'
       });
@@ -1559,7 +1568,8 @@ describe("Backbone-Strap Test Suite", function() {
       model.$fetching = true;
 
       var options = {
-        success: success
+        success: success,
+        complete: complete
       };
 
       // WHEN
@@ -1570,6 +1580,7 @@ describe("Backbone-Strap Test Suite", function() {
       expect($.ajax).not.toHaveBeenCalled();
       expect(model.$fetching).toBe(true);
       expect(success).not.toHaveBeenCalled();
+      expect(complete).not.toHaveBeenCalled();
     });
 
     it("should save model and update flags", function() {
@@ -1603,12 +1614,14 @@ describe("Backbone-Strap Test Suite", function() {
     it("should save model, update flags and trigger original success", function() {
       // GIVEN
       var success = jasmine.createSpy('success');
+      var complete = jasmine.createSpy('complete');
       var model = new Backbone.StrapModel({}, {
         urlRoot: '/foo'
       });
 
       var options = {
-        success: success
+        success: success,
+        complete: complete
       };
 
       // WHEN
@@ -1619,6 +1632,7 @@ describe("Backbone-Strap Test Suite", function() {
       expect($.ajax).toHaveBeenCalled();
       expect(model.$saving).toBe(true);
       expect(success).not.toHaveBeenCalled();
+      expect(complete).not.toHaveBeenCalled();
 
       var xhr = $.ajax.mostRecentCall.args[0];
       expect(xhr.url).toBe('/foo');
@@ -1635,6 +1649,7 @@ describe("Backbone-Strap Test Suite", function() {
       xhr.success(response);
 
       expect(success).toHaveBeenCalledWith(model, response, jasmine.any(Object));
+      expect(complete).toHaveBeenCalledWith(model, response, jasmine.any(Object));
       expect(model.$saving).toBe(false);
       expect(model.get('id')).toBe(id);
     });
@@ -1642,12 +1657,14 @@ describe("Backbone-Strap Test Suite", function() {
     it("should save model, update flags and trigger original error", function() {
       // GIVEN
       var error = jasmine.createSpy('error');
+      var complete = jasmine.createSpy('complete');
       var model = new Backbone.StrapModel({}, {
         urlRoot: '/foo'
       });
 
       var options = {
-        error: error
+        error: error,
+        complete: complete
       };
 
       // WHEN
@@ -1658,6 +1675,7 @@ describe("Backbone-Strap Test Suite", function() {
       expect($.ajax).toHaveBeenCalled();
       expect(model.$saving).toBe(true);
       expect(error).not.toHaveBeenCalled();
+      expect(complete).not.toHaveBeenCalled();
 
       var xhr = $.ajax.mostRecentCall.args[0];
       expect(xhr.url).toBe('/foo');
@@ -1673,12 +1691,14 @@ describe("Backbone-Strap Test Suite", function() {
       xhr.error(response);
 
       expect(error).toHaveBeenCalledWith(model, response, jasmine.any(Object));
+      expect(complete).toHaveBeenCalledWith(model, response, jasmine.any(Object));
       expect(model.$saving).toBe(false);
     });
 
     it("should not save model if a saving is already in progress", function() {
       // GIVEN
       var success = jasmine.createSpy('success');
+      var complete = jasmine.createSpy('success');
       var model = new Backbone.StrapModel({}, {
         urlRoot: '/foo'
       });
@@ -1697,6 +1717,7 @@ describe("Backbone-Strap Test Suite", function() {
       expect($.ajax).not.toHaveBeenCalled();
       expect(model.$saving).toBe(true);
       expect(success).not.toHaveBeenCalled();
+      expect(complete).not.toHaveBeenCalled();
     });
 
     it("should destroy model and update flags", function() {
@@ -1728,12 +1749,14 @@ describe("Backbone-Strap Test Suite", function() {
     it("should save model, update flags and trigger original success", function() {
       // GIVEN
       var success = jasmine.createSpy('success');
+      var complete = jasmine.createSpy('complete');
       var model = new Backbone.StrapModel({id: 1}, {
         urlRoot: '/foo'
       });
 
       var options = {
-        success: success
+        success: success,
+        complete: complete
       };
 
       // WHEN
@@ -1744,6 +1767,7 @@ describe("Backbone-Strap Test Suite", function() {
       expect($.ajax).toHaveBeenCalled();
       expect(model.$destroying).toBe(true);
       expect(success).not.toHaveBeenCalled();
+      expect(complete).not.toHaveBeenCalled();
 
       var xhr = $.ajax.mostRecentCall.args[0];
       expect(xhr.url).toBe('/foo/1');
@@ -1759,18 +1783,21 @@ describe("Backbone-Strap Test Suite", function() {
       xhr.success(response);
 
       expect(success).toHaveBeenCalledWith(model, response, jasmine.any(Object));
+      expect(complete).toHaveBeenCalledWith(model, response, jasmine.any(Object));
       expect(model.$destroying).toBe(false);
     });
 
-    xit("should save model, update flags and trigger original error", function() {
+    it("should save model, update flags and trigger original error", function() {
       // GIVEN
       var error = jasmine.createSpy('error');
+      var complete = jasmine.createSpy('complete');
       var model = new Backbone.StrapModel({id: 1}, {
         urlRoot: '/foo'
       });
 
       var options = {
-        error: error
+        error: error,
+        complete: complete
       };
 
       // WHEN
@@ -1781,6 +1808,7 @@ describe("Backbone-Strap Test Suite", function() {
       expect($.ajax).toHaveBeenCalled();
       expect(model.$destroying).toBe(true);
       expect(error).not.toHaveBeenCalled();
+      expect(complete).not.toHaveBeenCalled();
 
       var xhr = $.ajax.mostRecentCall.args[0];
       expect(xhr.url).toBe('/foo/1');
@@ -1796,12 +1824,14 @@ describe("Backbone-Strap Test Suite", function() {
       xhr.error(response);
 
       expect(error).toHaveBeenCalledWith(model, response, jasmine.any(Object));
+      expect(complete).toHaveBeenCalledWith(model, response, jasmine.any(Object));
       expect(model.$destroying).toBe(false);
     });
 
     it("should not destroy model if a destroy is already in progress", function() {
       // GIVEN
       var success = jasmine.createSpy('success');
+      var complete = jasmine.createSpy('complete');
       var model = new Backbone.StrapModel({}, {
         urlRoot: '/foo'
       });
@@ -1809,7 +1839,8 @@ describe("Backbone-Strap Test Suite", function() {
       model.$destroying = true;
 
       var options = {
-        success: success
+        success: success,
+        complete: complete
       };
 
       // WHEN
@@ -1820,6 +1851,7 @@ describe("Backbone-Strap Test Suite", function() {
       expect($.ajax).not.toHaveBeenCalled();
       expect(model.$destroying).toBe(true);
       expect(success).not.toHaveBeenCalled();
+      expect(complete).not.toHaveBeenCalled();
     });
   });
 

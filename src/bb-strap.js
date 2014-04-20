@@ -1102,10 +1102,15 @@
         that[flagName] = TRUE;
 
         var settings = options || {};
+        var complete = settings.complete;
         var success = settings.success;
         var error = settings.error;
 
-        var onComplete = function() {
+        var onComplete = function(model, response, options) {
+          if (complete) {
+            complete(model, response, options);
+          }
+
           that[flagName] = FALSE;
 
           // Prevent memory leak
@@ -1116,14 +1121,14 @@
           if (success) {
             success(model, response, options);
           }
-          onComplete();
+          onComplete(model, response, options);
         };
 
         settings.error = function(model, response, options) {
           if (error) {
             error(model, response, options);
           }
-          onComplete();
+          onComplete(model, response, options);
         };
 
         var args = [settings];
