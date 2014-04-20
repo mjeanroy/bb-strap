@@ -261,11 +261,13 @@ describe("Backbone-Strap Test Suite", function() {
 
       // THEN
       expect(result).toBe(Backbone.Mediator);
-      expect(Backbone.Mediator.channels['foo']).toEqual([{
-        fn: fn1,
-        context: fn1,
-        once: false
-      }]);
+      expect(Backbone.Mediator.channels['foo']).toEqual([
+        {
+          fn: fn1,
+          context: fn1,
+          once: false
+        }
+      ]);
     });
 
     it("should publish to dedicated channels", function() {
@@ -320,11 +322,13 @@ describe("Backbone-Strap Test Suite", function() {
       expect(result).toBe(Backbone.Mediator);
       expect(fn1).toHaveBeenCalledWith(1, 2);
       expect(fn2).toHaveBeenCalledWith(1, 2);
-      expect(Backbone.Mediator.channels['foo']).toEqual([{
-        fn: fn1,
-        context: fn1,
-        once: false
-      }]);
+      expect(Backbone.Mediator.channels['foo']).toEqual([
+        {
+          fn: fn1,
+          context: fn1,
+          once: false
+        }
+      ]);
     });
 
     it("should subscribed once", function() {
@@ -337,11 +341,13 @@ describe("Backbone-Strap Test Suite", function() {
 
       // THEN
       expect(result).toBe(Backbone.Mediator);
-      expect(Backbone.Mediator.channels['foo']).toEqual([{
-        fn: fn1,
-        context: fn1,
-        once: true
-      }]);
+      expect(Backbone.Mediator.channels['foo']).toEqual([
+        {
+          fn: fn1,
+          context: fn1,
+          once: true
+        }
+      ]);
     });
 
     it("should have shortcuts to publish function", function() {
@@ -1406,6 +1412,414 @@ describe("Backbone-Strap Test Suite", function() {
       // THEN
       expect(result).toBe(view);
       expect(Backbone.Mediator.channels['foo']).toEqual([]);
+    });
+  });
+
+  describe("StrapModel Test Suite", function() {
+    beforeEach(function() {
+      this.xhr = jasmine.createSpyObj('xhr', ['done', 'fail', 'always']);
+      spyOn($, 'ajax').andReturn(this.xhr);
+    });
+
+    it("should initialize a model with flags equal to false", function() {
+      // WHEN
+      var model = new Backbone.StrapModel();
+
+      // THEN
+      expect(model.$fetching).toBe(false);
+      expect(model.$saving).toBe(false);
+      expect(model.$destroying).toBe(false);
+    });
+
+    it("should initialize a model with given options", function() {
+      // GIVEN
+      var options = {
+        foobar: 'hello world',
+        foo: 'bar'
+      };
+
+      // WHEN
+      var model = new Backbone.StrapModel({}, options);
+
+      // THEN
+      expect(model.foobar).toBe('hello world');
+      expect(model.foo).toBe('bar');
+    });
+
+    it("should fetch model and update flags", function() {
+      // GIVEN
+      var model = new Backbone.StrapModel({}, {
+        urlRoot: '/foo'
+      });
+
+      // WHEN
+      var jqXhr = model.fetch();
+
+      // THEN
+      expect(jqXhr).toBe(this.xhr);
+      expect($.ajax).toHaveBeenCalled();
+      expect(model.$fetching).toBe(true);
+
+      var xhr = $.ajax.mostRecentCall.args[0];
+      expect(xhr.url).toBe('/foo');
+      expect(xhr.type).toBe('GET');
+      expect(xhr.success).toEqual(jasmine.any(Function));
+      expect(xhr.error).toEqual(jasmine.any(Function));
+
+      // Trigger success
+      var id = 1;
+      xhr.success({id: id});
+      expect(model.$fetching).toBe(false);
+      expect(model.get('id')).toBe(id);
+    });
+
+    it("should fetch model, update flags and trigger original success", function() {
+      // GIVEN
+      var success = jasmine.createSpy('success');
+      var model = new Backbone.StrapModel({}, {
+        urlRoot: '/foo'
+      });
+
+      var options = {
+        success: success
+      };
+
+      // WHEN
+      var jqXhr = model.fetch(options);
+
+      // THEN
+      expect(jqXhr).toBe(this.xhr);
+      expect($.ajax).toHaveBeenCalled();
+      expect(model.$fetching).toBe(true);
+      expect(success).not.toHaveBeenCalled();
+
+      var xhr = $.ajax.mostRecentCall.args[0];
+      expect(xhr.url).toBe('/foo');
+      expect(xhr.type).toBe('GET');
+      expect(xhr.success).toEqual(jasmine.any(Function));
+      expect(xhr.error).toEqual(jasmine.any(Function));
+
+      // Trigger success
+      var id = 1;
+      var response = {
+        id: id
+      };
+
+      xhr.success(response);
+
+      expect(success).toHaveBeenCalledWith(model, response, jasmine.any(Object));
+      expect(model.$fetching).toBe(false);
+      expect(model.get('id')).toBe(id);
+    });
+
+    it("should fetch model, update flags and trigger original error", function() {
+      // GIVEN
+      var error = jasmine.createSpy('error');
+      var model = new Backbone.StrapModel({}, {
+        urlRoot: '/foo'
+      });
+
+      var options = {
+        error: error
+      };
+
+      // WHEN
+      var jqXhr = model.fetch(options);
+
+      // THEN
+      expect(jqXhr).toBe(this.xhr);
+      expect($.ajax).toHaveBeenCalled();
+      expect(model.$fetching).toBe(true);
+      expect(error).not.toHaveBeenCalled();
+
+      var xhr = $.ajax.mostRecentCall.args[0];
+      expect(xhr.url).toBe('/foo');
+      expect(xhr.type).toBe('GET');
+      expect(xhr.success).toEqual(jasmine.any(Function));
+      expect(xhr.error).toEqual(jasmine.any(Function));
+
+      // Trigger success
+      var response = {
+        status: 400
+      };
+
+      xhr.error(response);
+
+      expect(error).toHaveBeenCalledWith(model, response, jasmine.any(Object));
+      expect(model.$fetching).toBe(false);
+    });
+
+    it("should not fetch model if a fetching is already in progress", function() {
+      // GIVEN
+      var success = jasmine.createSpy('success');
+      var model = new Backbone.StrapModel({}, {
+        urlRoot: '/foo'
+      });
+
+      model.$fetching = true;
+
+      var options = {
+        success: success
+      };
+
+      // WHEN
+      var jqXhr = model.fetch(options);
+
+      // THEN
+      expect(jqXhr).toBe(null);
+      expect($.ajax).not.toHaveBeenCalled();
+      expect(model.$fetching).toBe(true);
+      expect(success).not.toHaveBeenCalled();
+    });
+
+    it("should save model and update flags", function() {
+      // GIVEN
+      var model = new Backbone.StrapModel({}, {
+        urlRoot: '/foo'
+      });
+
+      // WHEN
+      var jqXhr = model.save();
+
+      // THEN
+      expect(jqXhr).toBe(this.xhr);
+      expect($.ajax).toHaveBeenCalled();
+      expect(model.$saving).toBe(true);
+
+      var xhr = $.ajax.mostRecentCall.args[0];
+      expect(xhr.url).toBe('/foo');
+      expect(xhr.type).toBe('POST');
+      expect(xhr.success).toEqual(jasmine.any(Function));
+      expect(xhr.error).toEqual(jasmine.any(Function));
+
+      // Trigger success
+      var id = 1;
+      xhr.success({id: id});
+
+      expect(model.$saving).toBe(false);
+      expect(model.get('id')).toBe(id);
+    });
+
+    it("should save model, update flags and trigger original success", function() {
+      // GIVEN
+      var success = jasmine.createSpy('success');
+      var model = new Backbone.StrapModel({}, {
+        urlRoot: '/foo'
+      });
+
+      var options = {
+        success: success
+      };
+
+      // WHEN
+      var jqXhr = model.save({}, options);
+
+      // THEN
+      expect(jqXhr).toBe(this.xhr);
+      expect($.ajax).toHaveBeenCalled();
+      expect(model.$saving).toBe(true);
+      expect(success).not.toHaveBeenCalled();
+
+      var xhr = $.ajax.mostRecentCall.args[0];
+      expect(xhr.url).toBe('/foo');
+      expect(xhr.type).toBe('POST');
+      expect(xhr.success).toEqual(jasmine.any(Function));
+      expect(xhr.error).toEqual(jasmine.any(Function));
+
+      // Trigger success
+      var id = 1;
+      var response = {
+        id: id
+      };
+
+      xhr.success(response);
+
+      expect(success).toHaveBeenCalledWith(model, response, jasmine.any(Object));
+      expect(model.$saving).toBe(false);
+      expect(model.get('id')).toBe(id);
+    });
+
+    it("should save model, update flags and trigger original error", function() {
+      // GIVEN
+      var error = jasmine.createSpy('error');
+      var model = new Backbone.StrapModel({}, {
+        urlRoot: '/foo'
+      });
+
+      var options = {
+        error: error
+      };
+
+      // WHEN
+      var jqXhr = model.save({}, options);
+
+      // THEN
+      expect(jqXhr).toBe(this.xhr);
+      expect($.ajax).toHaveBeenCalled();
+      expect(model.$saving).toBe(true);
+      expect(error).not.toHaveBeenCalled();
+
+      var xhr = $.ajax.mostRecentCall.args[0];
+      expect(xhr.url).toBe('/foo');
+      expect(xhr.type).toBe('POST');
+      expect(xhr.success).toEqual(jasmine.any(Function));
+      expect(xhr.error).toEqual(jasmine.any(Function));
+
+      // Trigger success
+      var response = {
+        status: 400
+      };
+
+      xhr.error(response);
+
+      expect(error).toHaveBeenCalledWith(model, response, jasmine.any(Object));
+      expect(model.$saving).toBe(false);
+    });
+
+    it("should not save model if a saving is already in progress", function() {
+      // GIVEN
+      var success = jasmine.createSpy('success');
+      var model = new Backbone.StrapModel({}, {
+        urlRoot: '/foo'
+      });
+
+      model.$saving = true;
+
+      var options = {
+        success: success
+      };
+
+      // WHEN
+      var jqXhr = model.save({}, options);
+
+      // THEN
+      expect(jqXhr).toBe(null);
+      expect($.ajax).not.toHaveBeenCalled();
+      expect(model.$saving).toBe(true);
+      expect(success).not.toHaveBeenCalled();
+    });
+
+    it("should destroy model and update flags", function() {
+      // GIVEN
+      var model = new Backbone.StrapModel({id: 1}, {
+        urlRoot: '/foo'
+      });
+
+      // WHEN
+      var jqXhr = model.destroy();
+
+      // THEN
+      expect(jqXhr).toBe(this.xhr);
+      expect($.ajax).toHaveBeenCalled();
+      expect(model.$destroying).toBe(true);
+
+      var xhr = $.ajax.mostRecentCall.args[0];
+      expect(xhr.url).toBe('/foo/1');
+      expect(xhr.type).toBe('DELETE');
+      expect(xhr.success).toEqual(jasmine.any(Function));
+      expect(xhr.error).toEqual(jasmine.any(Function));
+
+      // Trigger success
+      xhr.success();
+
+      expect(model.$destroying).toBe(false);
+    });
+
+    it("should save model, update flags and trigger original success", function() {
+      // GIVEN
+      var success = jasmine.createSpy('success');
+      var model = new Backbone.StrapModel({id: 1}, {
+        urlRoot: '/foo'
+      });
+
+      var options = {
+        success: success
+      };
+
+      // WHEN
+      var jqXhr = model.destroy(options);
+
+      // THEN
+      expect(jqXhr).toBe(this.xhr);
+      expect($.ajax).toHaveBeenCalled();
+      expect(model.$destroying).toBe(true);
+      expect(success).not.toHaveBeenCalled();
+
+      var xhr = $.ajax.mostRecentCall.args[0];
+      expect(xhr.url).toBe('/foo/1');
+      expect(xhr.type).toBe('DELETE');
+      expect(xhr.success).toEqual(jasmine.any(Function));
+      expect(xhr.error).toEqual(jasmine.any(Function));
+
+      // Trigger success
+      var response = {
+        status: 201
+      };
+
+      xhr.success(response);
+
+      expect(success).toHaveBeenCalledWith(model, response, jasmine.any(Object));
+      expect(model.$destroying).toBe(false);
+    });
+
+    xit("should save model, update flags and trigger original error", function() {
+      // GIVEN
+      var error = jasmine.createSpy('error');
+      var model = new Backbone.StrapModel({id: 1}, {
+        urlRoot: '/foo'
+      });
+
+      var options = {
+        error: error
+      };
+
+      // WHEN
+      var jqXhr = model.destroy(options);
+
+      // THEN
+      expect(jqXhr).toBe(this.xhr);
+      expect($.ajax).toHaveBeenCalled();
+      expect(model.$destroying).toBe(true);
+      expect(error).not.toHaveBeenCalled();
+
+      var xhr = $.ajax.mostRecentCall.args[0];
+      expect(xhr.url).toBe('/foo/1');
+      expect(xhr.type).toBe('DELETE');
+      expect(xhr.success).toEqual(jasmine.any(Function));
+      expect(xhr.error).toEqual(jasmine.any(Function));
+
+      // Trigger success
+      var response = {
+        status: 400
+      };
+
+      xhr.error(response);
+
+      expect(error).toHaveBeenCalledWith(model, response, jasmine.any(Object));
+      expect(model.$destroying).toBe(false);
+    });
+
+    it("should not destroy model if a destroy is already in progress", function() {
+      // GIVEN
+      var success = jasmine.createSpy('success');
+      var model = new Backbone.StrapModel({}, {
+        urlRoot: '/foo'
+      });
+
+      model.$destroying = true;
+
+      var options = {
+        success: success
+      };
+
+      // WHEN
+      var jqXhr = model.destroy(options);
+
+      // THEN
+      expect(jqXhr).toBe(null);
+      expect($.ajax).not.toHaveBeenCalled();
+      expect(model.$destroying).toBe(true);
+      expect(success).not.toHaveBeenCalled();
     });
   });
 

@@ -39,7 +39,13 @@
 
   var BackboneView = Backbone.View.prototype;
   var BackboneCollection = Backbone.Collection.prototype;
+  var BackboneModel = Backbone.Model.prototype;
   var BackboneRouter = Backbone.Router.prototype;
+
+  // Save bytes
+  var FALSE = false;
+  var TRUE = true;
+  var NULL = null;
 
   var noop = function() {
   };
@@ -169,7 +175,7 @@
       channels[channel].push({
         fn: subscription,
         context: context || this,
-        once: once || false
+        once: once || FALSE
       });
 
       return this;
@@ -239,7 +245,7 @@
      * @return {object} this.
      */
     subscribeOnce: function(channel, subscription, context) {
-      return Backbone.Mediator.subscribe(channel, subscription, context, true);
+      return Backbone.Mediator.subscribe(channel, subscription, context, TRUE);
     }
   };
 
@@ -265,8 +271,8 @@
       that.$body = $('body');
 
       that.$html
-          .addClass('js')
-          .removeClass('no-js');
+        .addClass('js')
+        .removeClass('no-js');
 
       var location = window.location;
       that.url = location.protocol + '//' + location.host + location.pathname;
@@ -290,7 +296,7 @@
 
     /** Build app router */
     buildRouter: function() {
-      return null;
+      return NULL;
     },
 
     /** Initialization hook */
@@ -322,7 +328,7 @@
       var router = this.router;
       if (router) {
         if (_.isUndefined(trigger)) {
-          trigger = true;
+          trigger = TRUE;
         }
 
         // IE7 always add url in href
@@ -380,8 +386,8 @@
 
       if (!Backbone.history.started) {
         var defaults = {
-          silent: false,
-          pushState: true
+          silent: FALSE,
+          pushState: TRUE
         };
 
         Backbone.history.start(_.extend(defaults, _.pick(opts, 'silent', 'pushState')));
@@ -430,7 +436,9 @@
 
       var args = [].slice.call(arguments, 0);
       if (!args || !args.length) {
-        args = [{}];
+        args = [
+          {}
+        ];
       }
 
       // Shortcut to initialize
@@ -535,7 +543,7 @@
      * @returns {boolean} True if view is ready to render, false otherwise.
      */
     isReady: function() {
-      return true;
+      return TRUE;
     },
 
     /** Hook to implement for view initialization (view is already rendered) */
@@ -685,11 +693,11 @@
       var that = this;
 
       var exclude = {
-        $cache: true,
-        $subviews: true,
-        cid: true,
-        $el: true,
-        el: true
+        $cache: TRUE,
+        $subviews: TRUE,
+        cid: TRUE,
+        $el: TRUE,
+        el: TRUE
       };
 
       for (var key in that) {
@@ -699,7 +707,7 @@
             value.close();
           }
 
-          that[key] = null;
+          that[key] = NULL;
         }
       }
 
@@ -722,7 +730,7 @@
         var value = that[i];
         if (that.hasOwnProperty(i) && value instanceof Backbone.StrapView) {
           value.close();
-          that[i] = null;
+          that[i] = NULL;
         }
       }
 
@@ -900,7 +908,7 @@
       var iconLoader = _.result(that, 'iconLoader');
       var loadingClass = _.result(that, 'elLoader');
       if (!$i && iconLoader) {
-        that.$loading = true;
+        that.$loading = TRUE;
         $i = $('<i></i>').addClass(iconLoader);
         that.$el.addClass(loadingClass).html($i);
         that.$loader = $i;
@@ -915,11 +923,11 @@
     hideLoader: function() {
       var that = this;
       if (that.$loader) {
-        that.$loading = false;
+        that.$loading = FALSE;
         var loadingClass = _.result(that, 'elLoader');
         that.$el.removeClass(loadingClass);
         that.$loader.remove();
-        that.$loader = null;
+        that.$loader = NULL;
       }
       return this;
     }
@@ -927,8 +935,22 @@
 
   /** Compile template using Mustache */
   Backbone.MustacheView = Backbone.StrapView.extend({
-    compileTemplate: function(template, datas, partials) {
-      return Mustache.to_html(template, datas || {}, partials || {});
+
+    /**
+     * Compile template using mustache.js templating library.
+     * @param {string} template Template.
+     * @param {*=} data Template data.
+     * @param {*=} partials Template partials.
+     * @return {string} Compiled template.
+     */
+    compileTemplate: function(template, data, partials) {
+      var viewData = data || {};
+      if (!_.has(viewData, '$$json')) {
+        viewData.$$json = function(text, render) {
+          return render(JSON.stringify(text));
+        };
+      }
+      return Mustache.to_html(template, data || {}, partials || {});
     }
   });
 
@@ -987,10 +1009,10 @@
       if (this.length < this.total) {
         var params = options || {};
         params.data = _.extend(params.data || {}, paginationParameters);
-        params.processDatas = true;
-        params.remove = false;
-        params.merge = false;
-        params.add = true;
+        params.processDatas = TRUE;
+        params.remove = FALSE;
+        params.merge = FALSE;
+        params.add = TRUE;
 
         var that = this;
         var success = params.success;
@@ -1014,4 +1036,105 @@
     }
   });
 
+  Backbone.StrapModel = Backbone.Model.extend({
+    /**
+     * Model constructor.
+     * @param {object=} attributes Model attributes.
+     * @param {object} options Model options.
+     */
+    constructor: function(attributes, options) {
+      // Save bytes
+      var that = this;
+
+      that.$fetching = that.$saving = that.$destroying = FALSE;
+
+      var opts = options || {};
+      _.each(opts, function(value, key) {
+        that[key] = value;
+      });
+
+      BackboneModel.constructor.call(that, attributes, opts);
+    },
+
+    /**
+     * Fetch model.
+     * @param {object=} options Fetch options.
+     * @return {*} jqXhr object, null if a fetching is in progress.
+     */
+    fetch: function(options) {
+      return this.$sync(NULL, options, 'fetch', '$fetching');
+    },
+
+    /**
+     * Save model.
+     * @param {object=} attributes Save attributes.
+     * @param {object=} options Save options.
+     * @return {*} jqXhr object, null if a save operation is in progress.
+     */
+    save: function(attributes, options) {
+      return this.$sync(attributes, options, 'save', '$saving');
+    },
+
+    /**
+     * Destroy model.
+     * @param {object=} options Destroy options.
+     * @return {*} jqXhr object, null if a destroy operation is in progress.
+     */
+    destroy: function(options) {
+      return this.$sync(NULL, options, 'destroy', '$destroying');
+    },
+
+    /**
+     * Sync function that updates flags associated with methods.
+     * If a same sync operation is in progress, sync operation will not be
+     * triggered and null will be returned.
+     * @param attrs Attributes.
+     * @param options Sync options.
+     * @param methodName Method name (fetch, save, delete).
+     * @param flagName Flag name ($fetching, $saving, $deleting).
+     * @return {*} jqXHR.
+     */
+    $sync: function(attrs, options, methodName, flagName) {
+      var that = this;
+      var returnValue = NULL;
+
+      if (!that[flagName] || options.force) {
+        that[flagName] = TRUE;
+
+        var settings = options || {};
+        var success = settings.success;
+        var error = settings.error;
+
+        var onComplete = function() {
+          that[flagName] = FALSE;
+
+          // Prevent memory leak
+          settings = success = error = onComplete = NULL;
+        };
+
+        settings.success = function(model, response, options) {
+          if (success) {
+            success(model, response, options);
+          }
+          onComplete();
+        };
+
+        settings.error = function(model, response, options) {
+          if (error) {
+            error(model, response, options);
+          }
+          onComplete();
+        };
+
+        var args = [settings];
+        if (methodName === 'save') {
+          args.unshift(attrs);
+        }
+
+        returnValue = Backbone.Model.prototype[methodName].apply(that, args);
+      }
+
+      return returnValue;
+    }
+  });
 }));
