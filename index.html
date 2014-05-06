@@ -34,6 +34,15 @@
 
         .panel-heading {
           font-size: 20px;
+          cursor: pointer;
+          padding-left: 50px;
+          background-image: url(images/no-expand.png);
+          background-repeat: no-repeat;
+          background-position: 1% 50%;
+        }
+
+        .panel-heading.off {
+          background-image: url(images/expand.png);
         }
 
         .italic {
@@ -443,6 +452,12 @@ model.fetch({
         $menu.on('click', function(e) {
           $menu.removeClass('active');
           $(e.currentTarget).addClass('active');
+        });
+
+        $('.panel-heading').on('click', function() {
+          $(this)
+            .toggleClass('off')
+            .next().slideToggle('slow');
         });
       })(jQuery);
     </script>
