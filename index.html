@@ -1,0 +1,449 @@
+<!doctype html>
+<!--[if lt IE 7]>      <html lang="en" class="ie6"> <![endif]-->
+<!--[if IE 7]>         <html lang="en" class="ie7"> <![endif]-->
+<!--[if IE 8]>         <html lang="en" class="ie8"> <![endif]-->
+<!--[if gt IE 8]><!--> <html lang="en">         <!--<![endif]-->
+  <head>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="description" content="">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+
+      <title>BBStrap - Bootstrap your backbone application</title>
+
+      <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+
+      <style type="text/css">
+        body {
+          padding-top: 70px;
+        }
+
+        h4 {
+          margin-top: 30px;
+        }
+
+        .jumbotron,
+        .content {
+          width: 90%;
+          margin: auto;
+        }
+
+        .panel {
+          margin-top: 20px;
+        }
+
+        .panel-heading {
+          font-size: 20px;
+        }
+
+        .italic {
+          font-style: italic;
+        }
+      </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Backbone Strap</a>
+        </div>
+
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#home">Home</a></li>
+            <li><a href="#mediator">Mediator</a></li>
+            <li><a href="#templates">Template Manager</a></li>
+            <li><a href="#views">Views</a></li>
+            <li><a href="#models">Models</a></li>
+            <li><a href="#collections">Collections</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="jumbotron">
+      <h1>Backbone Strap</h1>
+      <p>v0.1.0</p>
+      <p class="small italic">Simple Backbone Framework used to bootstrap your application</p>
+      <p>
+        <a class="btn btn-primary" href="https://github.com/mjeanroy/bb-strap">View on GitHub»</a>
+        <a class="btn btn-success" href="https://github.com/mjeanroy/bb-strap/tags">Download»</a>
+      </p>
+    </div>
+
+    <div class="content">
+      <div id="home" class="panel panel-default">
+        <div class="panel-heading">Info</div>
+        <div class="panel-body">
+          <h3>Goal</h3>
+          <p>
+            The main goal of Backbone-Strap is:
+            <ul>
+              <li>Eliminate necessary boilerplate used to develop backbone applications.</li>
+              <li>Avoid memory leak that can occur with backbone applications.</li>
+              <li>Share common pattern to develop backbone applications.</li>
+            </ul>
+            If Backbone-Strap does not fit your needs, feel free to submit an issue or use an other awesome backbone framework (such as <a href="http://marionettejs.com/">Marionette</a> or <a href="https://github.com/tbranyen/backbone.layoutmanager">Layout Manager</a>).
+          </p>
+
+          <h3>Browser Compatibility</h3>
+          <p>
+            Backbone Strap should work with majority of browsers including:
+            <ul>
+              <li>IE 7+</li>
+              <li>Firefox 3.5+</li>
+              <li>Google Chrome</li>
+              <li>Safari</li>
+              <li>Opera</li>
+            </ul>
+          </p>
+
+          <h3>License</h3>
+          <p>
+            Backbone Strap is licensed under the <a href="http://opensource.org/licenses/MIT">MIT license</a>.
+          </p>
+
+          <h3>Credits</h3>
+          <p>
+            Backbone Strap is developed and maintained by <a href="https://twitter.com/mickaeljeanroy">@mickaeljeanroy</a>.
+          </p>
+        </div>
+      </div>
+
+      <div id="mediator" class="panel panel-default">
+        <div class="panel-heading">Mediator</div>
+        <div class="panel-body">
+          <p>
+            A mediator object is automatically created and it lets you broadcast / subscribe to custom events. Note that the mediator is a singleton and the same instance
+            is used everywhere.
+            <table class="table table-stripped table-bordered">
+              <tbody>
+                <tr>
+                  <td><code>subscribe</code></td>
+                  <td>Function</td>
+                  <td>Subscribe to an event.</td>
+                </tr>
+                <tr>
+                  <td><code>sub</code></td>
+                  <td>Function</td>
+                  <td>Alias to <code>subscribe</code> method.</td>
+                </tr>
+                <tr>
+                  <td><code>subscribeOnce</code></td>
+                  <td>Function</td>
+                  <td>Subscribe to an event only once (event is automatically unsubscribed after first broadcast).</td>
+                </tr>
+                <tr>
+                  <td><code>publish</code></td>
+                  <td>Function</td>
+                  <td>Publish event.</td>
+                </tr>
+                <tr>
+                  <td><code>pub</code></td>
+                  <td>Function</td>
+                  <td>Alias to <code>publish</code> method.</td>
+                </tr>
+                <tr>
+                  <td><code>unsubscribe</code></td>
+                  <td>Function</td>
+                  <td>Clear a specific subscriptions.</td>
+                </tr>
+                <tr>
+                  <td><code>clear</code></td>
+                  <td>Function</td>
+                  <td>Clear all subscriptions.</td>
+                </tr>
+              </tbody>
+            </table>
+          </p>
+
+<pre>
+var mediator = Backbone.Mediator;
+
+var callback = function() {};
+var context = this;
+
+// Subscribe to an event
+mediator.subscribe(
+  'foo',    // First parameter is the name of the event.
+  callback, // Second parameter is the callback to execute when event is broadcasted.
+  context   // Third parameter is the context (a.k.a this) of callback (optional).
+);
+
+// Subscribe to an event
+mediator.subscribeOnce(
+  'foo',    // First parameter is the name of the event.
+  callback, // Second parameter is the callback to execute when event is broadcasted.
+  context   // Third parameter is the context (a.k.a this) of callback (optional).
+);
+
+// Unsubscribe
+mediator.unsubscribe(
+  'foo',    // First parameter is the name of the event to unsubscribe.
+  callback, // Second parameter is the callback to unsubscribe (optional, by default all subscriptions are removed).
+  context,  // Third parameter is the context that was given at subscription.
+);
+
+// Clear subscriptions
+mediator.clear();
+
+// Clear subscriptions
+mediator.publish(
+  'foo', // Event to broadcast
+  1, 2   // Parameters to given to callbacks
+);
+</pre>
+        </div>
+      </div>
+
+      <div id="templates" class="panel panel-default">
+        <div class="panel-heading">Template Manager</div>
+        <div class="panel-body">
+      </div>
+
+      <div id="views" class="panel panel-default">
+        <div class="panel-heading">Views</div>
+        <div class="panel-body">
+          <p>Backbone Strap provide new object <code>StrapView</code> with new feature.</p>
+
+          <h3>Constructor</h3>
+          <p>Parameter given during object initialization are automatically set on object.</p>
+          <p>It means that you don't need <code>initialize</code> anymore !</p>
+<pre>
+var view = new Backbone.StrapView({
+  foo: 'bar'
+});
+
+console.log(view.foo); // 'bar'
+</pre>
+
+          <h3>jQuery Cache</h3>
+          <p>A jQuery cache is automatically managed on top of <code>Backbone.View.$</code> function.</p>
+          <p>
+            <table class="table table-stripped table-bordered">
+              <tbody>
+                <tr>
+                  <td><code>$cache</code></td>
+                  <td>Property</td>
+                  <td>Cache of jQuery objects (key is the selector, value is the jQuery object).</td>
+                </tr>
+                <tr>
+                  <td><code>$c</code></td>
+                  <td>Function</td>
+                  <td>Function used to retrieve jQuery objects from cache or DOM</td>
+                </tr>
+                <tr>
+                  <td><code>$clear</code></td>
+                  <td>Function</td>
+                  <td>Function used to clear jQuery cache.</td>
+                </tr>
+              </tbody>
+            </table>
+<pre>
+var $foo = view.$c('#foo');
+
+// Second call will be retrieved from cache
+var $bar = view.$c('#foo');
+
+console.log($foo === $bar); // true
+console.log(view.$cache);
+
+view.$clear();
+console.log(view.$cache);
+</pre>
+          </p>
+
+          <h3>Subviews</h3>
+          <p>
+            Subviews can be stored in a dynamic map (key is the view cid, value is the view).
+          </p>
+          <p>
+            <table class="table table-stripped table-bordered">
+              <tbody>
+                <tr>
+                  <td><code>$subviews</code></td>
+                  <td>Property</td>
+                  <td>Map of nested subviews.</td>
+                </tr>
+                 <tr>
+                  <td><code>$addSubview</code></td>
+                  <td>Function</td>
+                  <td>Add subview to the map of subviews from a DOM element.</td>
+                </tr>
+                <tr>
+                  <td><code>addSubview</code></td>
+                  <td>Function</td>
+                  <td>Add subview to the map of subviews.</td>
+                </tr>
+                <tr>
+                  <td><code>removeSubview</code></td>
+                  <td>Function</td>
+                  <td>Remove specific subview.</td>
+                </tr>
+                <tr>
+                  <td><code>closeSubviews</code></td>
+                  <td>Function</td>
+                  <td>Function used to close current subviews.</td>
+                </tr>
+              </tbody>
+            </table>
+          </p>
+<pre>
+var subview1 = new Backbone.StrapView();
+var subview2 = new Backbone.StrapView();
+
+var view = new Backbone.StrapView();
+
+// Add subviews
+view.addSubview(subview1);
+view.addSubview(subview2);
+
+// Remove first subview
+view.removeSubview(subview1);
+
+// Remove all subviews
+view.closeSubviews();
+
+// Add subview from DOM element
+view.$addSubview(
+  $('#bar'),           // - First parameter is the DOM element
+  Backbone.StrapView,  // - Second parameter is the view class
+  {}                   // - Third parameter is parameters given to the subview (optional)
+);
+</pre>
+
+          <h3>Destruction</h3>
+          <p>
+            View can be closed / cleard and every event are automatically detached: you don't have to worry about memory management.
+            <ul>
+              <li>View stop to listen to model or collections events.</li>
+              <li>jQuery events are detached.</li>
+              <li>jQuery cache is destroyed.</li>
+              <li>View content is removed (if close function is called, view $el object is also removed).</li>
+              <li>Subviews are destroyed.</li>
+              <li>Each view attributes is automatically destroyed to prevent memory leak.</li>
+            </ul>
+          </p>
+          <p>
+            <table class="table table-stripped table-bordered">
+              <tbody>
+                <tr>
+                  <td><code>close</code></td>
+                  <td>Function</td>
+                  <td>Close view and associated subviews.</td>
+                </tr>
+                 <tr>
+                  <td><code>clear</code></td>
+                  <td>Function</td>
+                  <td>Clear view (remove view content but <code>$el</code> is not removed) and close associated subviews.</td>
+                </tr>
+              </tbody>
+            </table>
+          </p>
+        </div>
+      </div>
+
+      <div id="models" class="panel panel-default">
+        <div class="panel-heading">Models</div>
+        <div class="panel-body">
+           <p>Backbone Strap provide new object <code>StrapModel</code> with new features.</p>
+<pre>
+var model = new Backbone.StrapModel({
+  url: '/foo'
+});
+</pre>
+
+          <div>
+            <h3>Constructor</h3>
+            <p>Parameter given during object initialization are automatically set on object.</p>
+            <p>It means that you don't need <code>initialize</code> anymore !</p>
+            <pre>
+var model = new Backbone.StrapModel({
+  foo: 'bar'
+});
+
+console.log(model.foo); // 'bar'
+</pre>
+            <h3>Sync Operations</h3>
+            <p>Each sync methods (i.e. <code>fetch</code>, <code>save</code> and <code>destroy</code>) is overriden with new features:</p>
+            <h4>> Complete Callback</h4>
+            <p>A new callback can be added and will be called after <code>success</code> or <code>error</code> callback with same parameters</p>
+<pre>
+model.fetch({
+  success: function() {
+    console.log('on success');
+  },
+  error: function() {
+    console.log('on error');
+  },
+  complete: function() {
+    console.log('on complete, always called after success or error callback');
+  }
+});
+</pre>
+
+            <h4>> Sync Flags</h4>
+            <p>When a sync method is called, a flag is set to <code>true</code>. It lets you know when a sync operation is in progress.</p>
+            <ul>
+              <li><code>$fetching</code> : Set to <code>true</code> / <code>false</code> if a fetch operation is in progress.
+              <li><code>$saving</code> : Set to <code>true</code> / <code>false</code> if a save operation is in progress.
+              <li><code>$destroying</code> : Set to <code>true</code> / <code>false</code> if a destroy operation is in progress.
+            </ul>
+<pre>
+console.log(model.$fetching);    // false
+model.fetch();
+console.log(model.$fetching);    // true
+
+console.log(model.$saving);      // false
+model.save();
+console.log(model.$saving);      // true
+
+console.log(model.$destroying);  // false
+model.destroy();
+console.log(model.$destroying);  // true
+</pre>
+
+            <h4>> Simultaneous Calls</h4>
+            <p>
+              When a sync method is triggered, a second sync operation will not be executed until current operation is not completed. It will prevent simultaneous call (that can occur when a user click twice on a button).
+              <br>
+              Sync operation can be forced by passing <code>force</code> option to settings parameter.</p>
+<pre>
+// Fetch operation will be triggered only once
+model.fetch();
+model.fetch();
+
+// Force fetch operation to be triggered even if last operation has not been completed
+model.fetch({
+  force: true
+});
+</pre>
+          </div>
+        </div>
+      </div>
+
+      <div id="collections" class="panel panel-default">
+        <div class="panel-heading">Collections</div>
+      </div>
+
+    </div>
+
+    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+
+    <script>
+      (function($) {
+        var $menu = $('.navbar-nav li');
+        $menu.on('click', function(e) {
+          $menu.removeClass('active');
+          $(e.currentTarget).addClass('active');
+        });
+      })(jQuery);
+    </script>
+  </body>
+</html>
