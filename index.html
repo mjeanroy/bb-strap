@@ -131,41 +131,41 @@
           <p>
             A mediator object is automatically created and it lets you broadcast / subscribe to custom events. Note that the mediator is a singleton and the same instance
             is used everywhere.
-            <table class="table table-stripped table-bordered">
+            <table class="table table-stripped table-bordered docs">
               <tbody>
                 <tr>
                   <td><code>subscribe</code></td>
-                  <td>Function</td>
+                  <td>function</td>
                   <td>Subscribe to an event.</td>
                 </tr>
                 <tr>
                   <td><code>sub</code></td>
-                  <td>Function</td>
+                  <td>function</td>
                   <td>Alias to <code>subscribe</code> method.</td>
                 </tr>
                 <tr>
                   <td><code>subscribeOnce</code></td>
-                  <td>Function</td>
+                  <td>function</td>
                   <td>Subscribe to an event only once (event is automatically unsubscribed after first broadcast).</td>
                 </tr>
                 <tr>
                   <td><code>publish</code></td>
-                  <td>Function</td>
+                  <td>function</td>
                   <td>Publish event.</td>
                 </tr>
                 <tr>
                   <td><code>pub</code></td>
-                  <td>Function</td>
+                  <td>function</td>
                   <td>Alias to <code>publish</code> method.</td>
                 </tr>
                 <tr>
                   <td><code>unsubscribe</code></td>
-                  <td>Function</td>
+                  <td>function</td>
                   <td>Clear a specific subscriptions.</td>
                 </tr>
                 <tr>
                   <td><code>clear</code></td>
-                  <td>Function</td>
+                  <td>function</td>
                   <td>Clear all subscriptions.</td>
                 </tr>
               </tbody>
@@ -214,6 +214,83 @@ mediator.publish(
       <div id="templates" class="panel panel-default">
         <div class="panel-heading">Template Manager</div>
         <div class="panel-body">
+          <p>Backbone Strap provide a really simple manager that can be used to fetch remote template.</p>
+          <p>
+            By default, each template will be loaded with a prefix and suffix value. It means that when template 'foo' is fetched, url that will be fetched is:
+            <code>[prefix]foo[suffix]</code>
+          </p>
+          <p>Note that template manager provide out of the box a cache of templates (template will be fetched only once).</code></p>
+          <p>
+            <table class="table table-stripped table-bordered">
+              <tbody>
+                <tr>
+                  <td><code>prefix</code></td>
+                  <td>property</td>
+                  <td>Prefix prepended to template url. Default value is <code>/templates/</code></td>
+                </tr>
+                <tr>
+                  <td><code>suffix</code></td>
+                  <td>property</td>
+                  <td>Suffix appended to template url. Default value is <code>.template.html</code></td>
+                </tr>
+                <tr>
+                  <td><code>load</code></td>
+                  <td>function</td>
+                  <td>Load a single template and trigger callback. If an array of templates is fetched, <code>loads</code> function will be executed instead.</td>
+                </tr>
+                <tr>
+                  <td><code>loads</code></td>
+                  <td>function</td>
+                  <td>Load an array of templates and trigger callback when every templates have been loaded.</td>
+                </tr>
+              </tbody>
+            </table>
+          </p>
+<pre>
+// Access default template
+var templateManager = Backbone.templateManager;
+
+// Create new template
+var templateManager = new Backbone.TemplateManager();
+
+// Create new template manager and override prefix and suffix properties
+var templateManager = new Backbone.TemplateManager({
+  prefix: '/foo',
+  suffix: '.html'
+});
+
+// Load a single template and execute given callback
+// URL that will be fetched is: /templates/foo.template.html
+templateManager.load('foo', function(html) {
+  console.log(html);
+});
+
+// Load a single template and execute given callback with given context (a.k.a 'this' value of callback)
+// URL that will be fetched is: /templates/foo.template.html
+templateManager.load('foo', function(html) {
+  console.log(html);
+}, this);
+
+// Load a single template and execute given callback
+// URL that will be fetched are:
+//  /templates/foo.template.html
+//  /templates/bar.template.html
+templateManager.load(['foo', 'bar'], function(html) {
+  // html parameter is a map of templates:
+  console.log(html['foo']);
+  console.log(html['bar']);
+});
+
+// Load a single template and execute given callback with given context (a.k.a 'this' value of callback)
+// URL that will be fetched are:
+//  /templates/foo.template.html
+//  /templates/bar.template.html
+templateManager.load(['foo', 'bar'], function(html) {
+  // html parameter is a map of templates:
+  console.log(html['foo']);
+  console.log(html['bar']);
+}, this);
+</pre>
         </div>
       </div>
 
@@ -233,6 +310,88 @@ var view = new Backbone.StrapView({
 console.log(view.foo); // 'bar'
 </pre>
 
+          <h3>Initialization</h3>
+          <p>
+            When view is initialized, Backbone Strap will check if view is already rendered (view can be rendered server side) and execute different callbacks:
+            <ol>
+              <li>Like any other Backbone application, <code>initialize</code> function is (always) executed.</li>
+              <li>A new callbacl is added and <code>onInit</code> function will be (always) executed after <code>initialize</code> function.</li>
+              <li>
+                Backbone Strap will then check if view is empty:
+                <ul>
+                  <li>
+                    If view is empty, <code>postInit</code> function is executed.<br>
+                    By default, this function do nothing and should be overriden with your own logic (probably fetch models or collections).
+                  </li>
+                  <li>
+                    If view is not empty, <code>onReady</code> function is executed.
+                    By default, this function do nothing and should be overriden with your own logic (probably initialize jQuery plugins or something else).
+                  </li>
+                </ul>
+              </li>
+            </ol>
+              Note that Backbone Strap functions (<code>onInit</code>, <code>postInit</code> and <code>onReady</code> will take view options as first arguments (or an empty object if view does not take any options).
+          </p>
+          <p>
+            When view is not empty, Backbone Strap provide two helpers functions that can be used to initialize objects. Suppose that you want to render your view server side (and be good with google indexation), you may want to initialize your models or collections without fetching it again. All you have to do is to add objects values in DOM and read values:
+<pre>
+&lt;script type="text/javascript"&gt;
+  window.$$model = {id: 1, name: 'foo'};
+&lt;/script&gt;
+
+// In your javascript files:
+var view = new Backbone.StrapView({
+  onInit: function() {
+    this.model = new Backbone.StrapModel();
+
+    // Ready model object from DOM.
+    // - First argument is name of variable on window object
+    // - Second argument is name of variable on view object
+    //
+    // Executed code out of the box is:
+    //   this.model.set(window.$$model);
+    //   delete window.$$model;
+    this.$read('$$model', 'model');
+
+    // Shortcut for:
+    //   this.$read('$$model', 'model'); 
+    this.$$read('model');
+  };
+});
+</pre>
+          </p>
+          <p>
+            <table class="table table-stripped table-bordered">
+              <tbody>
+                <tr>
+                  <td><code>onInit</code></td>
+                  <td>function</td>
+                  <td>Initialization function called after original <code>initialize</code> function.</td>
+                </tr>
+                <tr>
+                  <td><code>postInit</code></td>
+                  <td>function</td>
+                  <td>Initialization function called immediately after <code>onInit</code> callback when view is empty.</td>
+                </tr>
+                <tr>
+                  <td><code>onReady</code></td>
+                  <td>function</td>
+                  <td>Initialization function called immediately after <code>onInit</code> callback when view is not empty.</td>
+                </tr>
+                <tr>
+                  <td><code>$read</code></td>
+                  <td>function</td>
+                  <td>Read values from window object.</td>
+                </tr>
+                <tr>
+                  <td><code>$$read</code></td>
+                  <td>function</td>
+                  <td>Read values from window object (shortcut for <code>$read</code> function).</td>
+                </tr>
+              </tbody>
+            </table>
+          </p>
+
           <h3>jQuery Cache</h3>
           <p>A jQuery cache is automatically managed on top of <code>Backbone.View.$</code> function.</p>
           <p>
@@ -240,17 +399,17 @@ console.log(view.foo); // 'bar'
               <tbody>
                 <tr>
                   <td><code>$cache</code></td>
-                  <td>Property</td>
+                  <td>property</td>
                   <td>Cache of jQuery objects (key is the selector, value is the jQuery object).</td>
                 </tr>
                 <tr>
                   <td><code>$c</code></td>
-                  <td>Function</td>
+                  <td>function</td>
                   <td>Function used to retrieve jQuery objects from cache or DOM</td>
                 </tr>
                 <tr>
                   <td><code>$clear</code></td>
-                  <td>Function</td>
+                  <td>function()</td>
                   <td>Function used to clear jQuery cache.</td>
                 </tr>
               </tbody>
@@ -278,27 +437,27 @@ console.log(view.$cache);
               <tbody>
                 <tr>
                   <td><code>$subviews</code></td>
-                  <td>Property</td>
+                  <td>property</td>
                   <td>Map of nested subviews.</td>
                 </tr>
                  <tr>
                   <td><code>$addSubview</code></td>
-                  <td>Function</td>
+                  <td>function</td>
                   <td>Add subview to the map of subviews from a DOM element.</td>
                 </tr>
                 <tr>
                   <td><code>addSubview</code></td>
-                  <td>Function</td>
+                  <td>function</td>
                   <td>Add subview to the map of subviews.</td>
                 </tr>
                 <tr>
                   <td><code>removeSubview</code></td>
-                  <td>Function</td>
+                  <td>function</td>
                   <td>Remove specific subview.</td>
                 </tr>
                 <tr>
                   <td><code>closeSubviews</code></td>
-                  <td>Function</td>
+                  <td>function</td>
                   <td>Function used to close current subviews.</td>
                 </tr>
               </tbody>
@@ -328,6 +487,82 @@ view.$addSubview(
 );
 </pre>
 
+          <h3>Rendering</h3>
+          <p>
+            By default, views rendering is already implemented using:
+            <ul>
+              <li>Default template manager to fetch templates.</li>
+              <li><code>toJSON</code> method is used to get view data</li>
+              <li><code>templates</code> property / method is used to get view templates</li>
+            </ul>
+          </p>
+          <p>
+            <table class="table table-stripped table-bordered">
+              <tbody>
+                <tr>
+                  <td><code>templates</code></td>
+                  <td>property / function</td>
+                  <td>View templates.</td>
+                </tr>
+                <tr>
+                  <td><code>toJSON</code></td>
+                  <td>property / function</td>
+                  <td>View data used to populate view.</td>
+                </tr>
+                <tr>
+                  <td><code>compileTemplate</code></td>
+                  <td>function</td>
+                  <td>
+                    Function used to compile template using data (use underscore template function by default).<br>
+                    This function is already and should not be overriden.
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>toHtml</code></td>
+                  <td>function</td>
+                  <td>
+                    Function used to serialize view as HTML (by default, use <code>compileTemplate</code>).
+                    This function is already and should not be overriden.
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>populate</code></td>
+                  <td>function</td>
+                  <td>
+                    Build html views, i.e.:
+                    <ul>
+                      <li>Build html content (using <code>toHtml</code> function).</li>
+                      <li>Close current subviews. Since html will be override, subviews must be destroyed to avoid memory leak.</li>
+                      <li>Trigger <code>preRender</code> function (that can be used to execute code before rendering).</li>
+                      <li>Clear view.</li>
+                      <li>Add new html to <code>el</code> element.</li>
+                      <li>Trigger <code>onReady</code> function (that can be used to execute code when view is rendered).</code>
+                    </ul>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </p>
+<pre>
+// Suppose that template foo is an underscore template equal to:
+// &lt;div&gt;Id = &lt;%= obj.id %&gt;&lt;/div&gt;
+
+var view = new Backbone.StrapView({
+  templates: 'foo',
+  toJSON: {
+    obj: {
+      id: 1
+    }
+  },
+  el: '#foo'
+});
+
+view.render();
+
+// Template 'foo' will be fetched and generated template will be:
+// &lt;div&gt;Id = 1&lt;/div&gt;
+</pre>
+
           <h3>Destruction</h3>
           <p>
             View can be closed / cleard and every event are automatically detached: you don't have to worry about memory management.
@@ -345,12 +580,12 @@ view.$addSubview(
               <tbody>
                 <tr>
                   <td><code>close</code></td>
-                  <td>Function</td>
+                  <td>function</td>
                   <td>Close view and associated subviews.</td>
                 </tr>
                  <tr>
                   <td><code>clear</code></td>
-                  <td>Function</td>
+                  <td>function</td>
                   <td>Clear view (remove view content but <code>$el</code> is not removed) and close associated subviews.</td>
                 </tr>
               </tbody>
