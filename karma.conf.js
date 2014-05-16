@@ -37,13 +37,25 @@ module.exports = function(config) {
         included: true
       },
       {
-        pattern: 'src/*.js',
+        pattern: 'src/InlineTemplateManager.js',
         watched: true,
         served: true,
         included: true
       },
       {
-        pattern: 'test/*spec.js',
+        pattern: 'src/DOMTemplateManager.js',
+        watched: true,
+        served: true,
+        included: true
+      },
+      {
+        pattern: 'src/RemoteTemplateManager.js',
+        watched: true,
+        served: true,
+        included: true
+      },
+      {
+        pattern: 'test/*Spec.js',
         watched: true,
         served: true,
         included: true
