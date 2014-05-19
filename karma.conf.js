@@ -55,6 +55,12 @@ module.exports = function(config) {
         included: true
       },
       {
+        pattern: 'src/Mediator.js',
+        watched: true,
+        served: true,
+        included: true
+      },
+      {
         pattern: 'test/*Spec.js',
         watched: true,
         served: true,
