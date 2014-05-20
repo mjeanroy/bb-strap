@@ -79,6 +79,12 @@ module.exports = function(config) {
         included: true
       },
       {
+        pattern: 'src/SafeSync.js',
+        watched: true,
+        served: true,
+        included: true
+      },
+      {
         pattern: 'test/*Spec.js',
         watched: true,
         served: true,

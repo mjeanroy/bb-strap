@@ -22,38 +22,46 @@
  * THE SOFTWARE.
  */
 
-Backbone.RemoteTemplateManager = function(options) {
-  // Save bytes
-  var that = this;
-  var opts = options || {};
+var sync = Backbone.sync;
 
-  that.$cache = {};
-  that.prefix = opts.prefix || '/templates/';
-  that.suffix = opts.suffix || '.template.html';
-  that.initialize.apply(that, arguments);
-};
-
-_.extend(Backbone.RemoteTemplateManager.prototype, Backbone.DOMTemplateManager.prototype, {
-  /**
-   * Load a template, store result in cache and execute callback
-   * when template has been fetched.
-   * @param {string} id Id of template to load.
-   * @override
-   */
-  $get: function(id, callback) {
-    var promises = this.$cache;
-    promises[id] = promises[id] || Backbone.$.get(this.$url(id));
-    promises[id].done(function(html) {
-      callback.call(this, html, id);
-    });
-  },
-
-  /**
-   * Build url related to a given template id.
-   * @param {string} id Template id.
-   * @return {string} Template URL.
-   */
-  $url: function(id) {
-    return this.prefix + id + this.suffix;
+Backbone.sync = function(method, model, options) {
+  if (!model.$xhr) {
+    model.$xhr = {};
   }
-});
+
+  var opts = options || {};
+  var $xhr = model.$xhr[method];
+
+  // Abort current operation
+  if ($xhr && opts.safe !== false) {
+    $xhr.abort();
+  }
+
+  var success = options.success;
+  var error = options.error;
+
+  var done = function() {
+    model.$xhr[method] = null;
+    success = error = done = null;
+  };
+
+  options.success = function() {
+    success.apply(this, arguments);
+    done();
+  };
+
+  options.error = function() {
+    if (_.isFunction(error)) {
+      error.apply(this, arguments);
+    }
+    done();
+  };
+
+  // Call original function
+  var xhr = sync.apply(this, arguments);
+
+  // Store current operation
+  model.$xhr[method] = xhr;
+
+  return xhr;
+};
