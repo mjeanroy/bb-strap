@@ -85,3 +85,5 @@ Backbone.InlineTemplateManager.prototype = {
     this[fn](id, callback, context);
   }
 };
+
+Backbone.inlineTemplateManager = new Backbone.InlineTemplateManager();

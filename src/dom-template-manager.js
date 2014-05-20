@@ -52,3 +52,5 @@ _.extend(Backbone.DOMTemplateManager.prototype, Backbone.InlineTemplateManager.p
     }
   }
 });
+
+Backbone.domTemplateManager = new Backbone.DOMTemplateManager();

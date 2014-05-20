@@ -33,6 +33,10 @@ describe('RemoteTemplateManager Test Suite', function() {
     this.tmpl = new Backbone.RemoteTemplateManager();
   });
 
+  it('should have a remote template manager defined', function() {
+    expect(Backbone.remoteTemplateManager).toBeDefined();
+  });
+
   it('should build a remote template manager', function() {
     expect(this.tmpl.$cache).toEqual({});
     expect(this.tmpl.prefix).toBe('/templates/');

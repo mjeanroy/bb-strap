@@ -57,3 +57,5 @@ _.extend(Backbone.RemoteTemplateManager.prototype, Backbone.DOMTemplateManager.p
     return this.prefix + id + this.suffix;
   }
 });
+
+Backbone.remoteTemplateManager = new Backbone.RemoteTemplateManager();

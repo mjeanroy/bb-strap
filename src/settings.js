@@ -22,46 +22,9 @@
  * THE SOFTWARE.
  */
 
-var sync = Backbone.sync;
+// Turn on safe synchronization operations
+Backbone.safeSync = true;
 
-Backbone.sync = function(method, model, options) {
-  if (!model.$xhr) {
-    model.$xhr = {};
-  }
-
-  var opts = options || {};
-  var $xhr = model.$xhr[method];
-
-  // Abort current operation
-  if ($xhr && opts.safe !== false) {
-    $xhr.abort();
-  }
-
-  var success = options.success;
-  var error = options.error;
-
-  var done = function() {
-    model.$xhr[method] = null;
-    success = error = done = null;
-  };
-
-  options.success = function() {
-    success.apply(this, arguments);
-    done();
-  };
-
-  options.error = function() {
-    if (_.isFunction(error)) {
-      error.apply(this, arguments);
-    }
-    done();
-  };
-
-  // Call original function
-  var xhr = sync.apply(this, arguments);
-
-  // Store current operation
-  model.$xhr[method] = xhr;
-
-  return xhr;
-};
+// By default model / collections and view options are automatically
+// attach before initialize function
+Backbone.attachOptions = true;

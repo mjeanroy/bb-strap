@@ -37,25 +37,31 @@ module.exports = function(config) {
         included: true
       },
       {
-        pattern: 'src/InlineTemplateManager.js',
+        pattern: 'src/settings.js',
         watched: true,
         served: true,
         included: true
       },
       {
-        pattern: 'src/DOMTemplateManager.js',
+        pattern: 'src/inline-template-manager.js',
         watched: true,
         served: true,
         included: true
       },
       {
-        pattern: 'src/RemoteTemplateManager.js',
+        pattern: 'src/dom-template-manager.js',
         watched: true,
         served: true,
         included: true
       },
       {
-        pattern: 'src/Mediator.js',
+        pattern: 'src/remote-template-manager.js',
+        watched: true,
+        served: true,
+        included: true
+      },
+      {
+        pattern: 'src/mediator.js',
         watched: true,
         served: true,
         included: true
@@ -79,13 +85,13 @@ module.exports = function(config) {
         included: true
       },
       {
-        pattern: 'src/SafeSync.js',
+        pattern: 'src/safe-sync.js',
         watched: true,
         served: true,
         included: true
       },
       {
-        pattern: 'test/*Spec.js',
+        pattern: 'test/*spec.js',
         watched: true,
         served: true,
         included: true
