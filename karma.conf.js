@@ -85,6 +85,12 @@ module.exports = function(config) {
         included: true
       },
       {
+        pattern: 'src/composite-view.js',
+        watched: true,
+        served: true,
+        included: true
+      },
+      {
         pattern: 'src/safe-sync.js',
         watched: true,
         served: true,
