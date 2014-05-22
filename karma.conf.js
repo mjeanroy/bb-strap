@@ -103,6 +103,12 @@ module.exports = function(config) {
         included: true
       },
       {
+        pattern: 'src/router.js',
+        watched: true,
+        served: true,
+        included: true
+      },
+      {
         pattern: 'test/*spec.js',
         watched: true,
         served: true,
