@@ -35,6 +35,49 @@ Backbone.View = (function(View) {
 _.extend(Backbone.View.prototype, {
 
   /**
+   * Check if view content is empty.
+   * @return {boolean} True if view content is empty, false otherwise.
+   */
+  isEmpty: function() {
+    return !Backbone.$.trim(this.$el.html());
+  },
+
+  /** Loading icon. */
+  loader: 'icon-loader',
+
+  /** Css class appended to el element when spinner is displayed. */
+  classLoading: 'loading',
+
+  /**
+   * Display a spinner in view element.
+   * @return {Backbone.CompositeView} this.
+   */
+  $showLoader: function() {
+    var $i = this.$loader;
+    var icon = _.result(this, 'loader');
+    var css = _.result(this, 'classLoading');
+    if (!$i && icon) {
+      $i = Backbone.$('<i>').addClass(icon);
+      this.$el.addClass(css).html($i);
+      this.$loader = $i;
+    }
+    return this;
+  },
+
+  /**
+   * Hide spinner.
+   * @return {object} this.
+   */
+  $hideLoader: function() {
+    if (this.$loader) {
+      this.$el.removeClass(_.result(this, 'classLoading'));
+      this.$loader.remove();
+      this.$loader = null;
+    }
+    return this;
+  },
+
+  /**
    * No-Op function that should be override when view is disposed.
    * to run custom logic.
    */

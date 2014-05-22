@@ -34,6 +34,53 @@ describe('View Spec', function() {
   	expect(view.foo).toBeDefined();
   });
 
+  it('should return true if view is empty', function() {
+    var view = new Backbone.View();
+    view.$el.html('   ');
+
+    var isEmpty = view.isEmpty();
+
+    expect(isEmpty).toBe(true);
+  });
+
+  it('should return false if view is empty', function() {
+    var view = new Backbone.View();
+    view.$el.html('<span>foo</span>');
+
+    var isEmpty = view.isEmpty();
+
+    expect(isEmpty).toBe(false);
+  });
+
+  describe('Spinner', function() {
+    beforeEach(function() {
+      this.view = new Backbone.View();
+
+      spyOn($.fn, 'html').andCallThrough();
+      spyOn($.fn, 'remove').andCallThrough();
+    });
+
+    it('should display spinner', function() {
+      this.view.$showLoader();
+
+      expect(this.view.$el.hasClass('loading')).toBe(true);
+      expect(this.view.$loader).toBeDefined();
+      expect(this.view.$loader.hasClass('icon-loader')).toBe(true);
+    });
+
+    it('should hide spinner', function() {
+      this.view.$el.addClass('loading');
+      var $loader = $('<i>');
+      this.view.$loader = $loader;
+
+      this.view.$hideLoader();
+
+      expect(this.view.$el.hasClass('loading')).toBe(false);
+      expect(this.view.$loader).toBe(null);
+      expect($loader.remove).toHaveBeenCalled();
+    });
+  });
+
   describe('View Destruction', function() {
     beforeEach(function() {
       spyOn(Backbone.View.prototype, '$destroy').andCallThrough();
