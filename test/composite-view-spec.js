@@ -35,6 +35,7 @@ describe('Composite View Spec', function() {
     expect(view.$cache).toEqual({});
     expect(view.$subviews).toEqual({});
     expect(view.setSubscriptions).toHaveBeenCalled();
+    expect(view.tmplManager).toBe(Backbone.remoteTemplateManager);
   });
 
   it('should initialize a composite view with options', function() {
@@ -48,6 +49,7 @@ describe('Composite View Spec', function() {
     expect(view.$cache).toEqual({});
     expect(view.$subviews).toEqual({});
     expect(view.setSubscriptions).toHaveBeenCalled();
+    expect(view.tmplManager).toBe(Backbone.remoteTemplateManager);
   });
 
   describe('jQuery cache', function() {
@@ -328,6 +330,204 @@ describe('Composite View Spec', function() {
       expect(remove1).toHaveBeenCalled();
       expect(remove2).toHaveBeenCalled();
       expect(remove3).toHaveBeenCalled();
+    });
+  });
+
+  describe('Render', function() {
+    beforeEach(function() {
+      spyOn($.fn, 'empty').andCallThrough();
+      spyOn($.fn, 'html').andCallThrough();
+
+      spyOn(Backbone.CompositeView.prototype, '$clear').andCallThrough();
+      spyOn(Backbone.CompositeView.prototype, '$closeSubviews').andCallThrough();
+      spyOn(Backbone.CompositeView.prototype, 'onRendered').andCallThrough();
+      spyOn(Backbone.CompositeView.prototype, 'preRender').andCallThrough();
+      spyOn(Backbone.CompositeView.prototype, 'trigger').andCallThrough();
+      spyOn(Backbone.CompositeView.prototype, 'toHTML').andCallThrough();
+      spyOn(Backbone.CompositeView.prototype, '$populate').andCallThrough();
+      spyOn(Backbone.CompositeView.prototype, '$partials').andCallThrough();
+      spyOn(Backbone.remoteTemplateManager, 'load').andCallThrough();
+      spyOn(Backbone, '$compile').andCallThrough();
+    });
+
+    it('should render an empty view', function() {
+      var view = new Backbone.CompositeView();
+
+      var result = view.render();
+
+      expect(result.$el.empty).toHaveBeenCalled();
+    });
+
+    it('should render a single template', function() {
+      var view = new Backbone.CompositeView({
+        templates: 'foo'
+      });
+
+      var result = view.render();
+
+      expect(view.tmplManager.load).toHaveBeenCalledWith('foo', view.$loaded, view);
+    });
+
+    it('should render an array of templates', function() {
+      var view = new Backbone.CompositeView({
+        templates: ['foo', 'bar']
+      });
+
+      var result = view.render();
+
+      expect(view.tmplManager.load).toHaveBeenCalledWith(['foo', 'bar'], view.$loaded, view);
+    });
+
+    it('should render a single template that is a function', function() {
+      var view = new Backbone.CompositeView({
+        templates: function() {
+          return 'foo';
+        }
+      });
+
+      var result = view.render();
+
+      expect(view.tmplManager.load).toHaveBeenCalledWith('foo', view.$loaded, view);
+    });
+
+    it('should compile view', function() {
+      var view = new Backbone.CompositeView();
+
+      var data = {
+        id: 1
+      };
+
+      var partials = {
+        'bar': 'bar html'
+      };
+
+      view.$compile('foo', data, partials);
+
+      expect(Backbone.$compile).toHaveBeenCalledWith('foo', data, partials);
+    });
+
+    it('should serialize view to html', function() {
+      var data = {
+        id: 1
+      };
+
+      var partials = {
+        'bar': 'bar html'
+      };
+
+      var view = new Backbone.CompositeView({
+        toJSON: data
+      });
+
+      var html = view.toHTML('foo', partials);
+
+      expect(Backbone.$compile).toHaveBeenCalledWith('foo', data, partials);
+      expect(html).toBe('foo');
+    });
+
+    it('should serialize view to html using a toJSON function', function() {
+      var data = {
+        id: 1
+      };
+
+      var partials = {
+        'bar': 'bar html'
+      };
+
+      var view = new Backbone.CompositeView({
+        toJSON: function() {
+          return data;
+        }
+      });
+
+      var html = view.toHTML('foo', partials);
+
+      expect(Backbone.$compile).toHaveBeenCalledWith('foo', data, partials);
+      expect(html).toBe('foo');
+    });
+
+    it('should transform partials', function() {
+      var view = new Backbone.CompositeView();
+
+      var templates = {
+        'foo/foo': 'foo html',
+        'foo/bar': 'bar html'
+      };
+
+      var results = view.$partials(templates);
+
+      expect(results).toEqual({
+        foo: 'foo html',
+        bar: 'bar html'
+      });
+    });
+
+    it('should populate view when template is loaded', function() {
+      var view = new Backbone.CompositeView();
+
+      view.$loaded('foo');
+
+      expect(view.$populate).toHaveBeenCalledWith('foo');
+      expect(view.$partials).not.toHaveBeenCalled();
+    });
+
+    it('should populate view with partials when templates are loaded', function() {
+      var view = new Backbone.CompositeView({
+        templates: ['foo', 'bar']
+      });
+
+      var templates = {
+        foo: 'foo html',
+        bar: 'bar html'
+      };
+
+      view.$loaded(templates);
+
+      expect(view.$populate).toHaveBeenCalledWith('foo html', templates);
+      expect(view.$partials).toHaveBeenCalledWith(templates);
+    });
+
+    it('should populate view with partials and custom partials when templates are loaded', function() {
+      var view = new Backbone.CompositeView({
+        templates: ['foo', 'bar'],
+
+        partials: {
+          quix: 'quix html'
+        }
+      });
+
+      var templates = {
+        foo: 'foo html',
+        bar: 'bar html'
+      };
+
+      view.$loaded(templates);
+
+      expect(view.$populate).toHaveBeenCalledWith('foo html', {
+        foo: 'foo html',
+        bar: 'bar html',
+        quix: 'quix html'
+      });
+
+      expect(view.$partials).toHaveBeenCalledWith(templates);
+    });
+
+    it('should populate view', function() {
+      var view = new Backbone.CompositeView();
+
+      var templates = 'foo';
+
+      var result = view.$populate(templates);
+
+      expect(result).toBe(view);
+      expect(view.$clear).toHaveBeenCalled();
+      expect(view.$closeSubviews).toHaveBeenCalled();
+      expect(view.toHTML).toHaveBeenCalledWith(templates);
+      expect(view.preRender).toHaveBeenCalled();
+      expect(view.onRendered).toHaveBeenCalled();
+      expect(view.trigger).toHaveBeenCalledWith('render:end', view);
+      expect(view.trigger).toHaveBeenCalledWith('render:start', view);
+      expect(view.$el.html).toHaveBeenCalledWith('foo');
     });
   });
 });

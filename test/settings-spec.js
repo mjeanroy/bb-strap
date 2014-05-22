@@ -22,19 +22,33 @@
  * THE SOFTWARE.
  */
 
-// Turn on safe synchronization operations
-Backbone.safeSync = true;
+describe('Backbone Settings Spec', function() {
 
-// Id of default template manager
-Backbone.defaultTemplateManager = 'remote';
+  beforeEach(function() {
+    spyOn(_, 'template').andCallThrough();
+  });
 
-// By default model / collections and view options are automatically
-// attach before initialize function
-Backbone.attachOptions = true;
+  it('should compile template', function() {
+    var tmpl = 'hello: <%= name %>';
+    var data = {
+      name: 'foo'
+    };
 
-// Default template compilation function
-Backbone.$compile = function(template) {
-  return _.isFunction(template) ?
-    template.apply(this, [].slice.call(arguments, 1)) :
-    _.template.apply(_, arguments);
-};
+    var html = Backbone.$compile(tmpl, data);
+
+    expect(html).toBe('hello: foo');
+    expect(_.template).toHaveBeenCalledWith(tmpl, data);
+  });
+
+  it('should generate html using function', function() {
+    var tmpl = 'hello: <%= name %>';
+    var fn = _.template(tmpl);
+    var data = {
+      name: 'foo'
+    };
+
+    var html = Backbone.$compile(fn, data);
+
+    expect(html).toBe('hello: foo');
+  });
+});

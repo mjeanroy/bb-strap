@@ -26,6 +26,13 @@ Backbone.CompositeView = Backbone.View.extend({
   constructor: function() {
     this.$subviews = {};
     this.$cache = {};
+
+    // Define default template manager
+    var tmplManager = Backbone.defaultTemplateManager;
+    if (tmplManager) {
+      this.tmplManager = Backbone[tmplManager + 'TemplateManager'];
+    }
+
     Backbone.View.apply(this, arguments);
   },
 
@@ -136,5 +143,101 @@ Backbone.CompositeView = Backbone.View.extend({
    */
   $size: function() {
     return _.size(this.$subviews);
+  },
+
+  /** Hook to implement and called after view is rendered. */
+  onRendered: function() {},
+
+  /** Hook to implement and called before view is rendered. */
+  preRender: function() {},
+
+  /**
+   * Render view.
+   * @return {Backbone.CompositeView} this.
+   */
+  render: function() {
+    // Try to get defined templates
+    var templates = _.result(this, 'templates');
+
+    if (templates) {
+      // Fetch templates to render
+      this.tmplManager.load(templates, this.$loaded, this);
+    } else {
+      // Else it is an empty view
+      this.$el.empty();
+    }
+
+    return this;
+  },
+
+  $partials: function(partials) {
+    var results = {};
+    _.each(partials, function(value, key) {
+      var parts = key.split('/');
+      var id = _.last(parts);
+      results[id] = value;
+    });
+    return results;
+  },
+
+  /**
+   * Function called when templates have been fetched.
+   * @param {string|object} templates Loaded templates.
+   * @return {Backbone.CompositeView} this.
+   */
+  $loaded: function(templates) {
+    if (_.isString(templates)) {
+      // Simple template that don't need partials
+      this.$populate(templates);
+    } else {
+      // Need to extract partials
+      // By default, main template is the first declared in original templates array
+      var tmpl = templates[_.result(this, 'templates')[0]];
+      var partials = _.extend(this.$partials(templates), _.result(this, 'partials'));
+      this.$populate(tmpl, partials);
+    }
+
+    return this;
+  },
+
+  /**
+   * Populate view, i.e. replace current html
+   * with new html.
+   * @return {Backbone.CompositeView} this.
+   */
+  $populate: function() {
+    this.trigger('render:start', this);
+    this.preRender();
+
+    // HTML will be entirely redraw, so jQuery cache need to be cleared to avoid detached elements and memory leak/
+    this.$clear();
+
+    // Subviews will have to be redrawed.
+    this.$closeSubviews();
+
+    var html = this.toHTML.apply(this, arguments);
+    this.$el.html(html);
+
+    this.onRendered();
+    this.trigger('render:end', this);
+
+    return this;
+  },
+
+  /**
+   * Generate html view.
+   * @return {string} HTLM.
+   */
+  toHTML: function(templates, partials) {
+    var data = _.result(this, 'toJSON');
+    return this.$compile(templates, data, partials);
+  },
+
+  /**
+   * Compile function.
+   * Default behavior is to delegate to Backbone.$compile function.
+   */
+  $compile: function() {
+    return Backbone.$compile.apply(null, arguments);
   }
 });
