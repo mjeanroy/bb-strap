@@ -35,7 +35,7 @@ Backbone.View = (function(View) {
 _.extend(Backbone.View.prototype, {
 
   /**
-   * No-Op function that should be override when view is disposed
+   * No-Op function that should be override when view is disposed.
    * to run custom logic.
    */
   onDispose: function() {},

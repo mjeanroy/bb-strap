@@ -27,6 +27,11 @@ describe('Composite View Spec', function() {
   beforeEach(function() {
     spyOn(Backbone.CompositeView.prototype, 'setSubscriptions').andCallThrough();
     spyOn(Backbone.CompositeView.prototype, 'unsetSubscriptions').andCallThrough();
+
+    spyOn(Backbone.CompositeView.prototype, 'onInit').andCallThrough();
+    spyOn(Backbone.CompositeView.prototype, 'postInit').andCallThrough();
+    spyOn(Backbone.CompositeView.prototype, 'onReady').andCallThrough();
+    spyOn(Backbone.CompositeView.prototype, 'onRendered').andCallThrough();
   });
 
   it('should initialize a composite view without options', function() {
@@ -36,6 +41,7 @@ describe('Composite View Spec', function() {
     expect(view.$subviews).toEqual({});
     expect(view.setSubscriptions).toHaveBeenCalled();
     expect(view.tmplManager).toBe(Backbone.remoteTemplateManager);
+    expect(view.onInit).toHaveBeenCalled();
   });
 
   it('should initialize a composite view with options', function() {
@@ -50,6 +56,47 @@ describe('Composite View Spec', function() {
     expect(view.$subviews).toEqual({});
     expect(view.setSubscriptions).toHaveBeenCalled();
     expect(view.tmplManager).toBe(Backbone.remoteTemplateManager);
+    expect(view.onInit).toHaveBeenCalled();
+  });
+
+  it('should initialize an empty view', function() {
+    spyOn(Backbone.CompositeView.prototype, 'isEmpty').andReturn(true);
+
+    var view = new Backbone.CompositeView();
+
+    expect(view.onInit).toHaveBeenCalled();
+    expect(view.postInit).toHaveBeenCalled();
+    expect(view.onReady).not.toHaveBeenCalled();
+    expect(view.onRendered).not.toHaveBeenCalled();
+  });
+
+  it('should initialize a rendered view', function() {
+    spyOn(Backbone.CompositeView.prototype, 'isEmpty').andReturn(false);
+
+    var view = new Backbone.CompositeView();
+
+    expect(view.onInit).toHaveBeenCalled();
+    expect(view.postInit).not.toHaveBeenCalled();
+    expect(view.onReady).toHaveBeenCalled();
+    expect(view.onRendered).toHaveBeenCalled();
+  });
+
+  it('should return true if view is empty', function() {
+    var view = new Backbone.CompositeView();
+    view.$el.html('   ');
+
+    var isEmpty = view.isEmpty();
+
+    expect(isEmpty).toBe(true);
+  });
+
+  it('should return false if view is empty', function() {
+    var view = new Backbone.CompositeView();
+    view.$el.html('<span>foo</span>');
+
+    var isEmpty = view.isEmpty();
+
+    expect(isEmpty).toBe(false);
   });
 
   describe('jQuery cache', function() {
@@ -340,7 +387,6 @@ describe('Composite View Spec', function() {
 
       spyOn(Backbone.CompositeView.prototype, '$clear').andCallThrough();
       spyOn(Backbone.CompositeView.prototype, '$closeSubviews').andCallThrough();
-      spyOn(Backbone.CompositeView.prototype, 'onRendered').andCallThrough();
       spyOn(Backbone.CompositeView.prototype, 'preRender').andCallThrough();
       spyOn(Backbone.CompositeView.prototype, 'trigger').andCallThrough();
       spyOn(Backbone.CompositeView.prototype, 'toHTML').andCallThrough();

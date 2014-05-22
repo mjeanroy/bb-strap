@@ -23,7 +23,7 @@
  */
 
 Backbone.CompositeView = Backbone.View.extend({
-  constructor: function() {
+  constructor: function(options) {
     this.$subviews = {};
     this.$cache = {};
 
@@ -34,6 +34,43 @@ Backbone.CompositeView = Backbone.View.extend({
     }
 
     Backbone.View.apply(this, arguments);
+
+    var opts = options || {};
+
+    this.onInit(opts);
+    if (this.isEmpty()) {
+      this.postInit(opts);
+    } else {
+      this.onReady(opts);
+
+      // View is already rendered, so this hook has to be triggered
+      this.onRendered();
+    }
+  },
+
+  /**
+   * Hook that may be implemented and is called when view is fully initialized, i.e:
+   * - Initialize function has been triggered.
+   * - Event delegation is done.
+   * - Subscriptions are done.
+   */
+  onInit: function() {},
+
+  /**
+   * Hook that may be implemented and is called when view is fully initialized but empty.
+   * This function should be overriden to fetch view data.
+   */
+  postInit: function() {},
+
+  /** Hook that may be implemented and is called when view is fully initialized but alreay rendered. */
+  onReady: function() {},
+
+  /**
+   * Check if view content is empty.
+   * @return {boolean} True if view content is empty, false otherwise.
+   */
+  isEmpty: function() {
+    return !Backbone.$.trim(this.$el.html());
   },
 
   /**
@@ -170,6 +207,12 @@ Backbone.CompositeView = Backbone.View.extend({
     return this;
   },
 
+  /**
+   * Transform partial object.
+   * Each key may be an url, so by default only the last part of
+   * url is keep, it is the id of partial template.
+   * @return {object} Partials.
+   */
   $partials: function(partials) {
     var results = {};
     _.each(partials, function(value, key) {
