@@ -6,6 +6,8 @@
 
 module.exports = function(grunt) {
 
+  require('load-grunt-tasks')(grunt);
+
   grunt.initConfig({
 
     pkg: grunt.file.readJSON('package.json'),
@@ -47,18 +49,6 @@ module.exports = function(grunt) {
     }
 
   });
-
-  // Load clean task
-  grunt.loadNpmTasks('grunt-contrib-clean');
-
-  // Load the plugin that provides the "uglify" task.
-  grunt.loadNpmTasks('grunt-contrib-uglify');
-
-  // Load Karma Plugin that provides "karma" task
-  grunt.loadNpmTasks('grunt-karma');
-
-  // Load JsHint Plugin
-  grunt.loadNpmTasks('grunt-contrib-jshint');
 
   grunt.registerTask('test', [
     'karma'
