@@ -14,13 +14,35 @@ module.exports = function(grunt) {
 
     clean: ['build/'],
 
-    uglify: {
+    concat: {
       options: {
-        banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
+        stripBanners: true,
+        banner: grunt.file.read('header.js'),
+        footer: grunt.file.read('footer.js')
       },
+      dist: {
+        src: [
+          'src/settings.js',
+          'src/safe-sync.js',
+          'src/model.js',
+          'src/collection.js',
+          'src/view.js',
+          'src/mediator.js',
+          'src/inline-template-manager.js',
+          'src/dom-template-manager.js',
+          'src/remote-template-manager.js',
+          'src/app.js',
+          'src/router.js',
+          'src/composite-view.js'
+        ],
+        dest: 'build/bb-strap.js',
+      },
+    },
+
+    uglify: {
       build: {
-        src: 'src/<%= pkg.name %>.js',
-        dest: 'build/<%= pkg.name %>.min.js'
+        src: 'build/bb-strap.js',
+        dest: 'build/bb-strap.min.js'
       }
     },
 
@@ -28,12 +50,58 @@ module.exports = function(grunt) {
       unit: {
         configFile: 'karma.conf.js'
       },
-      // continuous integration mode: run tests once in PhantomJS browser.
+      // Continuous integration mode: run tests once in PhantomJS browser.
       continuous: {
         configFile: 'karma.conf.js',
         singleRun: true,
         browsers: [
           'PhantomJS'
+        ]
+      },
+      // Check concatened file
+      dist: {
+        configFile: 'karma.conf.js',
+        singleRun: true,
+        browsers: [
+          'PhantomJS'
+        ],
+        files: [
+          {
+            pattern: 'components/jquery/dist/jquery.js',
+            watched: false,
+            served: true,
+            included: true
+          },
+          {
+            pattern: 'components/jquery/jquery.js',
+            watched: false,
+            served: true,
+            included: true
+          },
+          {
+            pattern: 'components/underscore/underscore.js',
+            watched: false,
+            served: true,
+            included: true
+          },
+          {
+            pattern: 'components/backbone/backbone.js',
+            watched: false,
+            served: true,
+            included: true
+          },
+          {
+            pattern: 'build/bb-strap.js',
+            watched: true,
+            served: true,
+            included: true
+          },
+          {
+            pattern: 'test/*spec.js',
+            watched: true,
+            served: true,
+            included: true
+          }
         ]
       }
     },
@@ -59,7 +127,9 @@ module.exports = function(grunt) {
     'clean',
     'jshint',
     'karma:continuous',
-    'uglify'
+    'concat:dist',
+    'uglify',
+    'karma:dist'
   ]);
 
   grunt.registerTask('default', ['build']);
