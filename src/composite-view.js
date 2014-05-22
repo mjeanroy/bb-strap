@@ -65,6 +65,41 @@ Backbone.CompositeView = Backbone.View.extend({
   /** Hook that may be implemented and is called when view is fully initialized but alreay rendered. */
   onReady: function() {},
 
+  /** Loading icon. */
+  loader: 'icon-loader',
+
+  /** Css class appended to el element when spinner is displayed. */
+  classLoading: 'loading',
+
+  /**
+   * Display a spinner in view element.
+   * @return {Backbone.CompositeView} this.
+   */
+  $showLoader: function() {
+    var $i = this.$loader;
+    var icon = _.result(this, 'loader');
+    var css = _.result(this, 'classLoading');
+    if (!$i && icon) {
+      $i = Backbone.$('<i>').addClass(icon);
+      this.$el.addClass(css).html($i);
+      this.$loader = $i;
+    }
+    return this;
+  },
+
+  /**
+   * Hide spinner.
+   * @return {object} this.
+   */
+  $hideLoader: function() {
+    if (this.$loader) {
+      this.$el.removeClass(_.result(this, 'classLoading'));
+      this.$loader.remove();
+      this.$loader = null;
+    }
+    return this;
+  },
+
   /**
    * Check if view content is empty.
    * @return {boolean} True if view content is empty, false otherwise.

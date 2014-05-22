@@ -99,6 +99,35 @@ describe('Composite View Spec', function() {
     expect(isEmpty).toBe(false);
   });
 
+  describe('Spinner', function() {
+    beforeEach(function() {
+      this.view = new Backbone.CompositeView();
+
+      spyOn($.fn, 'html').andCallThrough();
+      spyOn($.fn, 'remove').andCallThrough();
+    });
+
+    it('should display spinner', function() {
+      this.view.$showLoader();
+
+      expect(this.view.$el.hasClass('loading')).toBe(true);
+      expect(this.view.$loader).toBeDefined();
+      expect(this.view.$loader.hasClass('icon-loader')).toBe(true);
+    });
+
+    it('should hide spinner', function() {
+      this.view.$el.addClass('loading');
+      var $loader = $('<i>');
+      this.view.$loader = $loader;
+
+      this.view.$hideLoader();
+
+      expect(this.view.$el.hasClass('loading')).toBe(false);
+      expect(this.view.$loader).toBe(null);
+      expect($loader.remove).toHaveBeenCalled();
+    });
+  });
+
   describe('jQuery cache', function() {
     beforeEach(function() {
       this.view = new Backbone.CompositeView();
