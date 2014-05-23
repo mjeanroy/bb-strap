@@ -35,6 +35,61 @@ Backbone.View = (function(View) {
 _.extend(Backbone.View.prototype, {
 
   /**
+   * Read data from DOM element.
+   * Suppose you have an element in your dom such as:
+   *
+   *   <script id="foo" type="application/json">{id: 1, name: 'foo'}</script>
+   *
+   * This function allow you to read json content and set values to model previously
+   * created on your view.
+   *
+   * Using this function, you can avoid useless round-trip to your backend to fetch
+   * external object.
+   *
+   * For example:
+   *
+   *  // Create model on the view
+   *  this.foo = new Backbone.Model();
+   *
+   *  // Read data from DOM:
+   *  this.$readData('foo');
+   *
+   *  // Now, this.foo.toJSON() is equal to {id: 1, name: 'foo'}
+   *
+   * You can also set value on a model with a different name:
+   *
+   *  this.model = new Backbone.Model();
+   *  this.$readDate('foo', 'model');
+   *
+   * Or set values on a created model:
+   *  this.model = new Backbone.Model();
+   *  this.$readDate('foo', this.model);
+   *
+   * This function need a polyfill to use JSON.parse function.
+   *
+   * @param {string} name Id of element to read from DOM.
+   * @param {string=} varName Name of model on view object, first parameter will be used if missing.
+   * @return {object} Updated model.
+   */
+  $readData: function(name, varName) {
+    var $ = Backbone.$;
+    var $elem = $('#' + name);
+    var content = $.trim($elem.text());
+    var modelName = varName || name;
+    var model = _.isString(modelName) ? this[modelName] : modelName;
+
+    if (content && model) {
+      var json = JSON.parse(content);
+      model.set(json);
+    }
+
+    // Remove DOM element
+    $elem.remove();
+
+    return model;
+  },
+
+  /**
    * Check if view content is empty.
    * @return {boolean} True if view content is empty, false otherwise.
    */

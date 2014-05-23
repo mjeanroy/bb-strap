@@ -34,7 +34,7 @@ describe('View Spec', function() {
   	expect(view.foo).toBeDefined();
   });
 
-  it('should return true if view is empty', function() {
+   it('should return true if view is empty', function() {
     var view = new Backbone.View();
     view.$el.html('   ');
 
@@ -78,6 +78,85 @@ describe('View Spec', function() {
       expect(this.view.$el.hasClass('loading')).toBe(false);
       expect(this.view.$loader).toBe(null);
       expect($loader.remove).toHaveBeenCalled();
+    });
+  });
+
+  describe('Read Data', function() {
+    beforeEach(function() {
+      var json = '{"id": 1, "name": "foo"}';
+      this.$script = $('<script>')
+        .attr('type', 'application/json')
+        .attr('id', 'foo')
+        .text(json)
+        .appendTo('body');
+
+      spyOn(JSON, 'parse').andCallThrough();
+    });
+
+    afterEach(function() {
+      this.$script.remove();
+    });
+
+    it('should read data and set value to foo', function() {
+      var view = new Backbone.View();
+      view.foo = new Backbone.Model();
+
+      var model = view.$readData('foo');
+
+      expect(model).toBeDefined();
+      expect(model.get('id')).toBe(1);
+      expect(model.get('name')).toBe('foo');
+      expect(view.foo).toBe(model);
+    });
+
+    it('should read data and set value to model', function() {
+      var view = new Backbone.View();
+      view.model = new Backbone.Model();
+
+      var model = view.$readData('foo', 'model');
+
+      expect(model).toBeDefined();
+      expect(model.get('id')).toBe(1);
+      expect(model.get('name')).toBe('foo');
+      expect(view.model).toBe(model);
+    });
+
+    it('should read data and set value to model object', function() {
+      var view = new Backbone.View();
+      view.model = new Backbone.Model();
+
+      var model = view.$readData('foo', view.model);
+
+      expect(model).toBeDefined();
+      expect(model.get('id')).toBe(1);
+      expect(model.get('name')).toBe('foo');
+      expect(view.model).toBe(model);
+    });
+
+    it('should not read data if dom content is empty', function() {
+      this.$script.text('');
+
+      var view = new Backbone.View();
+      view.foo = new Backbone.Model();
+
+      var model = view.$readData('foo');
+
+      expect(model).toBeDefined();
+      expect(view.foo).toBe(model);
+      expect(JSON.parse).not.toHaveBeenCalled();
+    });
+
+    it('should not read data if dom content is a blank string', function() {
+      this.$script.text('   ');
+
+      var view = new Backbone.View();
+      view.foo = new Backbone.Model();
+
+      var model = view.$readData('foo');
+
+      expect(model).toBeDefined();
+      expect(view.foo).toBe(model);
+      expect(JSON.parse).not.toHaveBeenCalled();
     });
   });
 

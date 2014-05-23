@@ -31,15 +31,20 @@ describe('DOMTemplateManager Test Suite', function() {
     this.barId = 'foo';
     this.barTemplate = 'foo tmpl';
 
-    $('<div>')
+    this.$div1 = $('<div>')
       .attr('id', this.fooId)
       .html(this.fooTemplate)
       .appendTo('body');
 
-    $('<div>')
+    this.$div2 = $('<div>')
       .attr('id', this.barId)
       .html(this.barTemplate)
       .appendTo('body');
+  });
+
+  afterEach(function() {
+    this.$div1.remove();
+    this.$div2.remove();
   });
 
   beforeEach(function() {
