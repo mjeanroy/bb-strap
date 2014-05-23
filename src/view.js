@@ -96,20 +96,46 @@ _.extend(Backbone.View.prototype, {
 
   /**
    * Check if view content is empty.
+   * View is empty if and only if view html content only contains spaces or blank lines.
+   * If view contains empty tags, such '<span></span>', view is not considered to be empty.
+   *
    * @return {boolean} True if view content is empty, false otherwise.
    */
   isEmpty: function() {
     return !Backbone.$.trim(this.$el.html());
   },
 
-  /** Loading icon. */
+  /**
+   * Loading icon.
+   * This property can be overriden to display a custom icon.
+   * @type {string|function}
+   */
   loader: 'icon-loader',
 
-  /** Css class appended to el element when spinner is displayed. */
+  /**
+   * Css class added to el element when view display a loading spinner.
+   * This property can be overriden to add custom css class.
+   * @type {string|function}
+   */
   classLoading: 'loading',
 
   /**
    * Display a spinner in view element.
+   *
+   * A css class will be added to el element that can be used to customize
+   * layout when view is loading.
+   * By default, css class is 'loading' but it can be overriden per view
+   * with 'loader' property.
+   *
+   * View HTML content will be replaced with an icon that should display
+   * a spinner.
+   *
+   * For example, view content will be:
+   *
+   *   <div class="loading"> <!-- This is the el element. -->
+   *     <i class="icon-loader"></i>
+   *   </div>
+   *
    * @return {Backbone.CompositeView} this.
    */
   $showLoader: function() {
@@ -125,7 +151,8 @@ _.extend(Backbone.View.prototype, {
   },
 
   /**
-   * Hide spinner.
+   * Remove current spinner if one has been previously added.
+   * Loading css class is also removed from el element.
    * @return {object} this.
    */
   $hideLoader: function() {

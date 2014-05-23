@@ -203,7 +203,29 @@ Backbone.CompositeView = Backbone.View.extend({
    * Transform partial object.
    * Each key may be an url, so by default only the last part of
    * url is keep, it is the id of partial template.
-   * @return {object} Partials.
+   *
+   * Suppose you have following partials object:
+   *
+   *   {
+   *      '/path/foo': 'foo template html',
+   *      '/path/sub/bar': 'bar template html'
+   *   }
+   *
+   * This function will return a new partials object equal to:
+   *
+   *  {
+   *    'foo': 'foo template html',
+   *    'bar': 'bar template html'
+   *  }
+   *
+   * Note that you will have to be careful to not have same templates id.
+   * For example: '/path/foo' and '/path/sub/foo' will have same template id.
+   *
+   * You should override this function with your custom logic if it does not fit
+   * your need.
+   *
+   * @param {object} partials Original partials object.
+   * @return {object} New partials object.
    */
   $partials: function(partials) {
     var results = {};
