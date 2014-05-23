@@ -25,8 +25,13 @@
 Backbone.View = (function(View) {
   return View.extend({
       constructor: function(options) {
-        _.extend(this, options || {});
+        // Attach options
+        _.extend(this, _.defaults(options || {}, _.result(this, 'defaults')));
+
+        // Trigger original constructor
         View.apply(this, arguments);
+
+        // Attach subscriptions
         this.setSubscriptions();
       }
     });

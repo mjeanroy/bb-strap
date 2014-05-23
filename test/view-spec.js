@@ -25,13 +25,51 @@
 describe('View Spec', function() {
 
   it('should create a new view with options', function() {
-  	var options = {
-  	  foo: 'bar'
-  	};
+    var options = {
+      foo: 'bar'
+    };
 
-  	var view = new Backbone.View(options);
+    var view = new Backbone.View(options);
 
-  	expect(view.foo).toBeDefined();
+    expect(view.foo).toBe('bar');
+  });
+
+  it('should create a new view with default options', function() {
+    var CustomView = Backbone.View.extend({
+      defaults: {
+        foo: 'foo',
+        bar: 'bar'
+      }
+    });
+
+    var options = {
+      foo: 'bar'
+    };
+
+    var view = new CustomView(options);
+
+    expect(view.foo).toBe('bar');
+    expect(view.bar).toBe('bar');
+  });
+
+  it('should create a new view with default options as a function', function() {
+    var CustomView = Backbone.View.extend({
+      defaults: function() {
+        return {
+          foo: 'foo',
+          bar: 'bar'
+        };
+      }
+    });
+
+    var options = {
+      foo: 'bar'
+    };
+
+    var view = new CustomView(options);
+
+    expect(view.foo).toBe('bar');
+    expect(view.bar).toBe('bar');
   });
 
    it('should return true if view is empty', function() {
