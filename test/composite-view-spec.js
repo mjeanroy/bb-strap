@@ -360,6 +360,105 @@ describe('Composite View Spec', function() {
       expect(remove2).toHaveBeenCalled();
       expect(remove3).toHaveBeenCalled();
     });
+
+    it('should read a subview from DOM without options', function() {
+      var el = '' +
+        '<div>' +
+        '  <div class="subview">Subview 1</div>' +
+        '  <div class="subview">Subview 1</div>' +
+        '</div>';
+
+      var $el = $(el);
+
+      this.view.setElement($el);
+
+      this.view.$readSubview('.subview', Backbone.CompositeView);
+
+      expect(this.view.$subviews).not.toEqual({});
+      expect(_.size(this.view.$subviews)).toBe(2);
+
+      var keys = _.keys(this.view.$subviews);
+
+      var subview1 = this.view.$subviews[keys[0]];
+      expect(subview1 instanceof Backbone.CompositeView).toBe(true);
+      expect(subview1.$el).toBeDefined();
+
+      var subview2 = this.view.$subviews[keys[1]];
+      expect(subview2 instanceof Backbone.CompositeView).toBe(true);
+      expect(subview2.$el).toBeDefined();
+    });
+
+    it('should read a subview from DOM with options', function() {
+      var el = '' +
+        '<div>' +
+        '  <div class="subview">Subview 1</div>' +
+        '  <div class="subview">Subview 1</div>' +
+        '</div>';
+
+      var $el = $(el);
+
+      this.view.setElement($el);
+
+      this.view.$readSubview('.subview', Backbone.CompositeView, {
+        foo: 'bar'
+      });
+
+      expect(this.view.$subviews).not.toEqual({});
+      expect(_.size(this.view.$subviews)).toBe(2);
+
+      var keys = _.keys(this.view.$subviews);
+
+      var subview1 = this.view.$subviews[keys[0]];
+      expect(subview1 instanceof Backbone.CompositeView).toBe(true);
+      expect(subview1.$el).toBeDefined();
+      expect(subview1.foo).toBe('bar');
+
+      var subview2 = this.view.$subviews[keys[1]];
+      expect(subview2 instanceof Backbone.CompositeView).toBe(true);
+      expect(subview2.$el).toBeDefined();
+      expect(subview2.foo).toBe('bar');
+    });
+
+    it('should read a subview from DOM with options as a function', function() {
+      var el = '' +
+        '<div>' +
+        '  <div class="subview">Subview 1</div>' +
+        '  <div class="subview">Subview 1</div>' +
+        '</div>';
+
+      var $el = $(el);
+
+      this.view.setElement($el);
+
+      var viewOptions = jasmine.createSpy('options').andCallFake(function() {
+        return {
+          foo: 'bar'
+        };
+      });
+
+      var result = this.view.$readSubview('.subview', Backbone.CompositeView, viewOptions);
+
+      expect(result).toBe(this.view);
+      expect(this.view.$subviews).not.toEqual({});
+      expect(_.size(this.view.$subviews)).toBe(2);
+
+      var keys = _.keys(this.view.$subviews);
+
+      var subview1 = this.view.$subviews[keys[0]];
+      expect(subview1 instanceof Backbone.CompositeView).toBe(true);
+      expect(subview1.$el).toBeDefined();
+      expect(subview1.foo).toBe('bar');
+
+      var subview2 = this.view.$subviews[keys[1]];
+      expect(subview2 instanceof Backbone.CompositeView).toBe(true);
+      expect(subview2.$el).toBeDefined();
+      expect(subview2.foo).toBe('bar');
+
+      expect(viewOptions).toHaveBeenCalled();
+      expect(viewOptions.callCount).toBe(2);
+      expect(viewOptions).toHaveBeenCalledWith(0, jasmine.any(Object));
+      expect(viewOptions).toHaveBeenCalledWith(1, jasmine.any(Object));
+    });
   });
 
   describe('Render', function() {

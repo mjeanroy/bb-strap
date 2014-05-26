@@ -167,6 +167,47 @@ Backbone.CompositeView = Backbone.View.extend({
   },
 
   /**
+   * Read subview from DOM element.
+   * For example:
+   *   <div id="foo">
+   *     Hello Subview
+   *   </div>
+   *
+   * You can create a subview from this dom element with:
+   *
+   *    this.$readSubview('#foo', Backbone.View, {
+   *      foo: 'bar'
+   *    });
+   *
+   * This will create a new subview.
+   * Options are optional and can be a function to execute.
+   *
+   * @param {string|Backbone.$} el View DOM element.
+   * @param {*} ViewClass View class to instantiate.
+   * @param {object|function=} options New view options.
+   * @return {Backbone.CompositeView} this.
+   */
+  $readSubview: function(el, ViewClass, options) {
+    var subviews = [];
+
+    var iterator = function($elem, index) {
+      var viewOptions = options || {};
+      if (_.isFunction(viewOptions)) {
+        viewOptions = viewOptions.call(this, index, $elem);
+      }
+
+      if (!viewOptions.el) {
+        viewOptions.el = $elem;
+      }
+
+      subviews.push(new ViewClass(viewOptions));
+    };
+
+    _.each(this.$(el), iterator, this);
+    return this.$addSubview.apply(this, subviews);
+  },
+
+  /**
    * Get size of composite view, i.e. current number of subviews.
    * @return {number} Number of subviews.
    */
