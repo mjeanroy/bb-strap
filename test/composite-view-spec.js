@@ -459,6 +459,47 @@ describe('Composite View Spec', function() {
       expect(viewOptions).toHaveBeenCalledWith(0, jasmine.any(Object));
       expect(viewOptions).toHaveBeenCalledWith(1, jasmine.any(Object));
     });
+
+    it('should append subview', function() {
+      var subview = new Backbone.CompositeView();
+      var $elSubview = $('<span></span>').text('Hello World');
+      subview.setElement($elSubview);
+
+      var result = this.view.append(subview);
+
+      expect(result).toBe(this.view);
+      expect(this.view.$subviews).not.toEqual({});
+      expect(_.size(this.view.$subviews)).toBe(1);
+
+      var keys = _.keys(this.view.$subviews);
+
+      var subview1 = this.view.$subviews[keys[0]];
+      expect(subview1).toBe(subview);
+      expect(this.view.$el.text()).toBe('Hello World');
+    });
+
+    it('should append subview', function() {
+      var subview = new Backbone.CompositeView();
+      var $elSubview = $('<span></span>').text('Subview');
+      subview.setElement($elSubview);
+
+      var $foo = $('<div>').attr('id', 'foo').text('Hello World');
+      var $el = $('<div>').append($foo);
+      this.view.setElement($el);
+
+      var result = this.view.append(subview, '#foo');
+
+      expect(result).toBe(this.view);
+      expect(this.view.$subviews).not.toEqual({});
+      expect(_.size(this.view.$subviews)).toBe(1);
+
+      var keys = _.keys(this.view.$subviews);
+
+      var subview1 = this.view.$subviews[keys[0]];
+      expect(subview1).toBe(subview);
+      expect(this.view.$el.text()).toBe('Hello WorldSubview');
+      expect($foo.text()).toBe('Hello WorldSubview');
+    });
   });
 
   describe('Render', function() {

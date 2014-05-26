@@ -208,6 +208,25 @@ Backbone.CompositeView = Backbone.View.extend({
   },
 
   /**
+   * Append subview to current view.
+   * @param {object} view Sub view to append.
+   * @param {string|object=} Element to append to, optional, by default view element is used.
+   * @return {Backbone.CompositeView} this.
+   */
+  append: function(view, el) {
+    // Get element to append to: by default this is $el element
+    var $el = el ? this.$(el) : this.$el;
+
+    // Append subview
+    $el.append(view.$el);
+
+    // Add to subviews object
+    this.$addSubview(view);
+
+    return this;
+  },
+
+  /**
    * Get size of composite view, i.e. current number of subviews.
    * @return {number} Number of subviews.
    */
