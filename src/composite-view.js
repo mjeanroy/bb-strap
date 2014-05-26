@@ -227,6 +227,41 @@ Backbone.CompositeView = Backbone.View.extend({
   },
 
   /**
+   * Append collection of models to view.
+   * @param {Backbone.Collection} collection Collection to append.
+   * @param {object} ViewClass Class of view to append.
+   * @param {object|function=} opts Optios that will be give to created view.
+   * @param {string|object=} el Element to append view to.
+   * @return {Backbone.CompositeView} this.
+   */
+  appendCollection: function(collection, ViewClass, opts, el) {
+    collection.each(function(model) {
+      this.appendModel(model, ViewClass, opts, el);
+    }, this);
+    return this;
+  },
+
+  /**
+   * Append models to view.
+   * @param {Backbone.Model} model Model to append.
+   * @param {object} ViewClass Class of view to append.
+   * @param {object|function=} opts Optios that will be give to created view.
+   * @param {string|object=} el Element to append view to.
+   * @return {Backbone.CompositeView} this.
+   */
+  appendModel: function(model, ViewClass, opts, el) {
+    var options = {};
+
+    if (opts) {
+      options = _.isFunction(opts) ? opts.call(this, model) : _.clone(opts);
+    } else {
+      options.model = model;
+    }
+
+    return this.append(new ViewClass(options), el);
+  },
+
+  /**
    * Get size of composite view, i.e. current number of subviews.
    * @return {number} Number of subviews.
    */

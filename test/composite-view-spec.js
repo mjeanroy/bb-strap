@@ -500,6 +500,92 @@ describe('Composite View Spec', function() {
       expect(this.view.$el.text()).toBe('Hello WorldSubview');
       expect($foo.text()).toBe('Hello WorldSubview');
     });
+
+    it('should append a view associated to given model', function() {
+      var model = new Backbone.Model({
+        id: 1
+      });
+
+      var result = this.view.appendModel(model, Backbone.CompositeView);
+
+      expect(result).toBe(this.view);
+      expect(this.view.$subviews).not.toEqual({});
+      expect(_.size(this.view.$subviews)).toBe(1);
+
+      var keys = _.keys(this.view.$subviews);
+
+      var subview1 = this.view.$subviews[keys[0]];
+      expect(subview1.model).toBe(model);
+    });
+
+    it('should append a view associated to given model with options as a function', function() {
+      var model = new Backbone.Model({
+        id: 1
+      });
+
+      var options = jasmine.createSpy('options').andCallFake(function(model) {
+        return {
+          foo: model
+        };
+      });
+
+      var result = this.view.appendModel(model, Backbone.CompositeView, options);
+
+      expect(result).toBe(this.view);
+      expect(this.view.$subviews).not.toEqual({});
+      expect(_.size(this.view.$subviews)).toBe(1);
+
+      var keys = _.keys(this.view.$subviews);
+
+      var subview1 = this.view.$subviews[keys[0]];
+      expect(subview1.foo).toBe(model);
+      expect(subview1.model).not.toBeDefined();
+      expect(options).toHaveBeenCalledWith(model);
+    });
+
+    it('should append a view associated to given collection', function() {
+      var model1 = new Backbone.Model({
+        id: 1
+      });
+
+      var model2 = new Backbone.Model({
+        id: 2
+      });
+
+      var collection = new Backbone.Collection([model1, model2]);
+
+      var result = this.view.appendCollection(collection, Backbone.CompositeView);
+
+      expect(result).toBe(this.view);
+      expect(this.view.$subviews).not.toEqual({});
+      expect(_.size(this.view.$subviews)).toBe(2);
+    });
+
+    it('should append a view associated to given collection using given options', function() {
+      var model1 = new Backbone.Model({
+        id: 1
+      });
+
+      var model2 = new Backbone.Model({
+        id: 2
+      });
+
+      var options = jasmine.createSpy('options').andCallFake(function(model) {
+        return {
+          foo: model
+        };
+      });
+
+      var collection = new Backbone.Collection([model1, model2]);
+
+      var result = this.view.appendCollection(collection, Backbone.CompositeView, options);
+
+      expect(result).toBe(this.view);
+      expect(this.view.$subviews).not.toEqual({});
+      expect(_.size(this.view.$subviews)).toBe(2);
+      expect(options).toHaveBeenCalledWith(model1);
+      expect(options).toHaveBeenCalledWith(model2);
+    });
   });
 
   describe('Render', function() {
