@@ -24,6 +24,10 @@
 
 describe('Model Spec', function() {
 
+  afterEach(function() {
+    Backbone.attachOptions = true;
+  });
+
   it('should create a new model with options', function() {
   	var attributes = {
   	  id: 1
@@ -36,6 +40,22 @@ describe('Model Spec', function() {
   	var model = new Backbone.Model(attributes, options);
 
   	expect(model.foo).toBeDefined();
+  });
+
+  it('should create a new model without options if option is disabled', function() {
+    Backbone.attachOptions = false;
+
+    var attributes = {
+      id: 1
+    };
+
+    var options = {
+      foo: 'bar'
+    };
+
+    var model = new Backbone.Model(attributes, options);
+
+    expect(model.foo).not.toBeDefined();
   });
 
 });

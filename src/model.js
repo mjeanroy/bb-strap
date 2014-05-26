@@ -25,7 +25,9 @@
 Backbone.Model = (function(Model) {
 	return Model.extend({
       constructor: function(attributes, options) {
-        _.extend(this, options || {});
+        if (Backbone.attachOptions) {
+          Backbone.$attach(this, options || {});
+        }
         Model.apply(this, arguments);
       }
     });

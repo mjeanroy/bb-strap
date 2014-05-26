@@ -26,7 +26,9 @@ Backbone.View = (function(View) {
   return View.extend({
       constructor: function(options) {
         // Attach options
-        _.extend(this, _.defaults(options || {}, _.result(this, 'defaults')));
+        if (Backbone.attachOptions) {
+          Backbone.$attach(this, _.defaults(options || {}, _.result(this, 'defaults')));
+        }
 
         // Trigger original constructor
         View.apply(this, arguments);

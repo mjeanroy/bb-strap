@@ -24,18 +24,38 @@
 
 describe('Collection Spec', function() {
 
+  afterEach(function() {
+    Backbone.attachOptions = true;
+  });
+
   it('should create a new collection with options', function() {
-  	var models = [{
-  	  id: 1
-  	}];
+    var models = [{
+      id: 1
+    }];
 
-  	var options = {
-  	  foo: 'bar'
-  	};
+    var options = {
+      foo: 'bar'
+    };
 
-  	var collection = new Backbone.Collection(models, options);
+    var collection = new Backbone.Collection(models, options);
 
-  	expect(collection.foo).toBeDefined();
+    expect(collection.foo).toBeDefined();
+  });
+
+  it('should not create a new collection with options if option is disabled', function() {
+    Backbone.attachOptions = false;
+
+    var models = [{
+      id: 1
+    }];
+
+    var options = {
+      foo: 'bar'
+    };
+
+    var collection = new Backbone.Collection(models, options);
+
+    expect(collection.foo).not.toBeDefined();
   });
 
 });

@@ -25,7 +25,9 @@
 Backbone.Collection = (function(Collection) {
 	return Collection.extend({
       constructor: function(models, options) {
-        _.extend(this, options || {});
+        if (Backbone.attachOptions) {
+          Backbone.$attach(this, options || {});
+        }
         Collection.apply(this, arguments);
       }
     });

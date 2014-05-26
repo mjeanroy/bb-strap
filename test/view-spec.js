@@ -24,6 +24,10 @@
 
 describe('View Spec', function() {
 
+  afterEach(function() {
+    Backbone.attachOptions = true;
+  });
+
   it('should create a new view with options', function() {
     var options = {
       foo: 'bar'
@@ -32,6 +36,18 @@ describe('View Spec', function() {
     var view = new Backbone.View(options);
 
     expect(view.foo).toBe('bar');
+  });
+
+  it('should not create a new view with options if option is disabled', function() {
+    Backbone.attachOptions = false;
+
+    var options = {
+      foo: 'bar'
+    };
+
+    var view = new Backbone.View(options);
+
+    expect(view.foo).not.toBeDefined();
   });
 
   it('should create a new view with default options', function() {

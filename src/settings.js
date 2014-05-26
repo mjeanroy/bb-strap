@@ -38,3 +38,16 @@ Backbone.$compile = function(template) {
     template.apply(this, [].slice.call(arguments, 1)) :
     _.template.apply(_, arguments);
 };
+
+// Default attach function, can be overriden to attach options
+// to a particuler attribute of given object
+// For example, this can be overriden to set options object to an 'options'
+// attribute on object:
+//
+//   Backbone.$attach = function(obj, options) {
+//     obj.options = options;
+//     return obj;
+//   };
+Backbone.$attach = function(obj, options) {
+  return _.extend(obj, options);
+};
