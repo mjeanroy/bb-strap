@@ -35,6 +35,11 @@ Backbone.View = (function(View) {
 
         // Attach subscriptions
         this.setSubscriptions();
+
+        // Attach bindings
+        if (this.model && this.bindings) {
+          this.bind(this.model, this.bindings);
+        }
       }
     });
 })(Backbone.View);
@@ -240,6 +245,35 @@ _.extend(Backbone.View.prototype, {
         this[i] = null;
       }
     }
+    return this;
+  },
+
+  /**
+   * A really simple one-way bindings that can be used to update DOM elements when a model attribute is updated.
+   * This has to be really simple, for more complex use case, see Backbone.stickit project
+   * (https://github.com/NYTimes/backbone.stickit).
+   *
+   * @param {object} model Model to watch.
+   * @param {object} bindings View bindings.
+   */
+  bind: function(model, bindings) {
+    model = model || this.model;
+    bindings = bindings || this.bindings;
+
+    if (model && bindings) {
+      _.each(bindings, function(value, key) {
+        var eventName = 'change:' + value;
+
+        // Remove previous handler.
+        this.stopListening(model, eventName);
+
+        // Add new handler.
+        this.listenTo(model, eventName, function(model, value) {
+          this.$(key).text(value);
+        });
+      }, this);
+    }
+
     return this;
   },
 

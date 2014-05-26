@@ -25,6 +25,10 @@
 // Turn on safe synchronization operations
 Backbone.safeSync = true;
 
+// Simple bindings can be disabled to used a dedicated plugin
+// like Backbone.stickit.
+Backbone.bindings = true;
+
 // Id of default template manager
 Backbone.defaultTemplateManager = 'remote';
 

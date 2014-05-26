@@ -88,7 +88,7 @@ describe('View Spec', function() {
     expect(view.bar).toBe('bar');
   });
 
-   it('should return true if view is empty', function() {
+  it('should return true if view is empty', function() {
     var view = new Backbone.View();
     view.$el.html('   ');
 
@@ -355,6 +355,53 @@ describe('View Spec', function() {
 
       expect(Backbone.Mediator.unsubscribe).toHaveBeenCalledWith('foo', fn1, this.view);
       expect(Backbone.Mediator.unsubscribe).toHaveBeenCalledWith('bar', fn2, this.view);
+    });
+  });
+
+  describe('View Bindings', function() {
+    it('should update view when model is updated', function() {
+      var $span = $('<span>').attr('id', 'first-name').text('foo');
+      var $el = $('<div>').append($span);
+
+      var model = new Backbone.Model({
+        firstName: 'foo'
+      });
+
+      var view = new Backbone.View({
+        model: model,
+        el: $el,
+        bindings: {
+          '#first-name': 'firstName'
+        }
+      });
+
+      model.set('firstName', 'bar');
+
+      expect($el.find('#first-name').text()).toBe('bar');
+    });
+
+    it('should update view of other model', function() {
+      var $span = $('<span>').attr('id', 'first-name').text('foo');
+      var $el = $('<div>').append($span);
+
+      var model = new Backbone.Model({
+        firstName: 'foo'
+      });
+
+      var view = new Backbone.View({
+        foo: model,
+        el: $el,
+        bindings: {
+          '#first-name': 'firstName'
+        },
+        initialize: function() {
+          this.bind(this.foo);
+        }
+      });
+
+      model.set('firstName', 'bar');
+
+      expect($el.find('#first-name').text()).toBe('bar');
     });
   });
 });
