@@ -114,8 +114,21 @@ module.exports = function(grunt) {
         'Gruntfile.js',
         'src/*.js'
       ]
-    }
+    },
 
+    bump: {
+      options: {
+        files: ['package.json', 'bower.json'],
+        updateConfigs: [],
+        commit: true,
+        commitMessage: 'Release v%VERSION%',
+        commitFiles: ['package.json', 'bower.json', 'dist'],
+        createTag: true,
+        tagName: 'v%VERSION%',
+        tagMessage: 'Version %VERSION%',
+        push: false
+      }
+  },
   });
 
   grunt.registerTask('test', [
@@ -131,6 +144,12 @@ module.exports = function(grunt) {
     'uglify',
     'karma:dist'
   ]);
+
+  grunt.registerTask('release', function(level) {
+    var lvl = level || 'minor';
+    grunt.task.run('build');
+    grunt.task.run('bump:' + lvl);
+  });
 
   grunt.registerTask('default', ['build']);
 };
