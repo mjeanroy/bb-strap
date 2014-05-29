@@ -123,22 +123,26 @@ Backbone.sync = function(method, model, options) {
   return xhr;
 };
 
+var modelKeys = _.keys(Backbone.Model.prototype);
+
 Backbone.Model = (function(Model) {
 	return Model.extend({
       constructor: function(attributes, options) {
-        if (Backbone.attachOptions) {
-          Backbone.$attach(this, options || {});
+        if (Backbone.attachOptions && options) {
+          Backbone.$attach(this, _.omit(options, modelKeys));
         }
         Model.apply(this, arguments);
       }
     });
 })(Backbone.Model);
 
+var collectionKeys = _.keys(Backbone.Collection.prototype);
+
 Backbone.Collection = (function(Collection) {
 	return Collection.extend({
       constructor: function(models, options) {
-        if (Backbone.attachOptions) {
-          Backbone.$attach(this, options || {});
+        if (Backbone.attachOptions && options) {
+          Backbone.$attach(this, _.omit(options, collectionKeys));
         }
         Collection.apply(this, arguments);
       }
