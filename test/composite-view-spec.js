@@ -32,6 +32,7 @@ describe('Composite View Spec', function() {
     spyOn(Backbone.CompositeView.prototype, 'postInit').andCallThrough();
     spyOn(Backbone.CompositeView.prototype, 'onReady').andCallThrough();
     spyOn(Backbone.CompositeView.prototype, 'onRendered').andCallThrough();
+    spyOn(Backbone.CompositeView.prototype, 'render').andCallThrough();
   });
 
   it('should initialize a composite view without options', function() {
@@ -66,18 +67,22 @@ describe('Composite View Spec', function() {
 
     expect(view.onInit).toHaveBeenCalled();
     expect(view.postInit).toHaveBeenCalled();
-    expect(view.onReady).not.toHaveBeenCalled();
+    expect(view.render).toHaveBeenCalled();
     expect(view.onRendered).not.toHaveBeenCalled();
   });
 
   it('should initialize a rendered view', function() {
     spyOn(Backbone.CompositeView.prototype, 'isEmpty').andReturn(false);
 
-    var view = new Backbone.CompositeView();
+    var onReady = jasmine.createSpy('onReady');
+
+    var view = new Backbone.CompositeView({
+      onReady: onReady
+    });
 
     expect(view.onInit).toHaveBeenCalled();
     expect(view.postInit).not.toHaveBeenCalled();
-    expect(view.onReady).toHaveBeenCalled();
+    expect(onReady).toHaveBeenCalled();
     expect(view.onRendered).toHaveBeenCalled();
   });
 
@@ -782,6 +787,19 @@ describe('Composite View Spec', function() {
       expect(view.trigger).toHaveBeenCalledWith('render:end', view);
       expect(view.trigger).toHaveBeenCalledWith('render:start', view);
       expect(view.$el.html).toHaveBeenCalledWith('foo');
+    });
+
+    it('should call on ready once', function() {
+      var onReady = jasmine.createSpy('onReady');
+      var view = new Backbone.CompositeView({
+        onReady: onReady
+      });
+
+      view.onReady();
+      view.onReady();
+
+      expect(onReady).toHaveBeenCalled();
+      expect(onReady.callCount).toBe(1);
     });
   });
 });
