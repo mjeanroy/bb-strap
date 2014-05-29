@@ -796,9 +796,6 @@ Backbone.CompositeView = Backbone.View.extend({
       // View is already rendered, so this hook has to be triggered
       this.onRendered();
     }
-
-    // Override onReady to be sure it will be called once
-    this.onReady = _.once(this.onReady);
   },
 
   /**
@@ -1128,7 +1125,6 @@ Backbone.CompositeView = Backbone.View.extend({
     var html = this.toHTML.apply(this, arguments);
     this.$el.html(html);
 
-    this.onReady();
     this.onRendered();
     this.trigger('render:end', this);
 
