@@ -788,18 +788,5 @@ describe('Composite View Spec', function() {
       expect(view.trigger).toHaveBeenCalledWith('render:start', view);
       expect(view.$el.html).toHaveBeenCalledWith('foo');
     });
-
-    it('should call on ready once', function() {
-      var onReady = jasmine.createSpy('onReady');
-      var view = new Backbone.CompositeView({
-        onReady: onReady
-      });
-
-      view.onReady();
-      view.onReady();
-
-      expect(onReady).toHaveBeenCalled();
-      expect(onReady.callCount).toBe(1);
-    });
   });
 });
