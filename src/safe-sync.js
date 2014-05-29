@@ -25,7 +25,9 @@
 var sync = Backbone.sync;
 
 Backbone.sync = function(method, model, options) {
-  if (!Backbone.safeSync) {
+  var opts = options || {};
+
+  if (!Backbone.safeSync || opts.safe === false) {
     return sync.apply(this, arguments);
   }
 
@@ -33,12 +35,16 @@ Backbone.sync = function(method, model, options) {
     model.$xhr = {};
   }
 
-  var opts = options || {};
   var $xhr = model.$xhr[method];
 
   // Abort current operation
-  if ($xhr && opts.safe !== false) {
-    $xhr.abort();
+  if ($xhr) {
+    var safeOp = opts.safe || Backbone.safeSync;
+    if (safeOp === 'abort') {
+      $xhr.abort();
+    } else if (safeOp === 'skip') {
+      return $xhr;
+    }
   }
 
   var success = options.success;

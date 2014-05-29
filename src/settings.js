@@ -23,7 +23,7 @@
  */
 
 // Turn on safe synchronization operations
-Backbone.safeSync = true;
+Backbone.safeSync = 'abort';
 
 // Simple bindings can be disabled to used a dedicated plugin
 // like Backbone.stickit.

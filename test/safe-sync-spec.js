@@ -32,6 +32,10 @@ describe('Sync Spec', function() {
     });
   });
 
+  afterEach(function() {
+    Backbone.safeSync = 'abort';
+  });
+
   describe('Sync Model Spec', function() {
     it('should fetch a model, store current xhr and clear xhr on success', function() {
       var success = jasmine.createSpy('success');
@@ -264,6 +268,82 @@ describe('Sync Spec', function() {
       expect(error).not.toHaveBeenCalled();
     });
 
+    it('should skip fetch when a model is fetched', function() {
+      Backbone.safeSync = 'skip';
+      var success = jasmine.createSpy('success');
+      var error = jasmine.createSpy('error');
+
+      var model = new Backbone.Model();
+      model.url = '/foo';
+
+      var oldXhr = model.fetch({
+        success: success,
+        error: error
+      });
+
+      var xhr = model.fetch({
+        success: success,
+        error: error
+      });
+
+      expect(oldXhr.abort).not.toHaveBeenCalled();
+      expect(xhr.abort).not.toHaveBeenCalled();
+      expect(model.$xhr['read']).toBe(oldXhr);
+      expect(success).not.toHaveBeenCalled();
+      expect(error).not.toHaveBeenCalled();
+    });
+
+    it('should trigger parallel fetch when a model is fetched', function() {
+      Backbone.safeSync = '';
+      var success = jasmine.createSpy('success');
+      var error = jasmine.createSpy('error');
+
+      var model = new Backbone.Model();
+      model.url = '/foo';
+
+      var oldXhr = model.fetch({
+        success: success,
+        error: error
+      });
+
+      var xhr = model.fetch({
+        success: success,
+        error: error
+      });
+
+      expect(oldXhr.abort).not.toHaveBeenCalled();
+      expect(xhr.abort).not.toHaveBeenCalled();
+      expect(model.$xhr).not.toBeDefined();
+      expect(success).not.toHaveBeenCalled();
+      expect(error).not.toHaveBeenCalled();
+    });
+
+    it('should trigger parallel fetch when a model is fetched', function() {
+      var success = jasmine.createSpy('success');
+      var error = jasmine.createSpy('error');
+
+      var model = new Backbone.Model();
+      model.url = '/foo';
+
+      var oldXhr = model.fetch({
+        safe: false,
+        success: success,
+        error: error
+      });
+
+      var xhr = model.fetch({
+        safe: false,
+        success: success,
+        error: error
+      });
+
+      expect(oldXhr.abort).not.toHaveBeenCalled();
+      expect(xhr.abort).not.toHaveBeenCalled();
+      expect(model.$xhr).not.toBeDefined();
+      expect(success).not.toHaveBeenCalled();
+      expect(error).not.toHaveBeenCalled();
+    });
+
     it('should abort previous save when a model is created', function() {
       var success = jasmine.createSpy('success');
       var error = jasmine.createSpy('error');
@@ -291,6 +371,56 @@ describe('Sync Spec', function() {
       expect(model.$xhr['create']).toBe(null);
       expect(success).toHaveBeenCalled();
       expect(success.callCount).toBe(1);
+      expect(error).not.toHaveBeenCalled();
+    });
+
+    it('should skip save when a model is created', function() {
+      Backbone.safeSync = 'skip';
+      var success = jasmine.createSpy('success');
+      var error = jasmine.createSpy('error');
+
+      var model = new Backbone.Model();
+      model.url = '/foo';
+
+      var oldXhr = model.save({}, {
+        success: success,
+        error: error
+      });
+
+      var xhr = model.save({}, {
+        success: success,
+        error: error
+      });
+
+      expect(oldXhr.abort).not.toHaveBeenCalled();
+      expect(xhr.abort).not.toHaveBeenCalled();
+      expect(model.$xhr['create']).toBe(oldXhr);
+      expect(success).not.toHaveBeenCalled();
+      expect(error).not.toHaveBeenCalled();
+    });
+
+    it('should trigger parallel save when a model is created', function() {
+      Backbone.safeSync = false;
+      var success = jasmine.createSpy('success');
+      var error = jasmine.createSpy('error');
+
+      var model = new Backbone.Model();
+      model.url = '/foo';
+
+      var oldXhr = model.save({}, {
+        success: success,
+        error: error
+      });
+
+      var xhr = model.save({}, {
+        success: success,
+        error: error
+      });
+
+      expect(oldXhr.abort).not.toHaveBeenCalled();
+      expect(xhr.abort).not.toHaveBeenCalled();
+      expect(model.$xhr).not.toBeDefined();
+      expect(success).not.toHaveBeenCalled();
       expect(error).not.toHaveBeenCalled();
     });
 
@@ -327,6 +457,62 @@ describe('Sync Spec', function() {
       expect(error).not.toHaveBeenCalled();
     });
 
+    it('should skip update when a model is updated', function() {
+      Backbone.safeSync = 'skip';
+      var success = jasmine.createSpy('success');
+      var error = jasmine.createSpy('error');
+
+      var model = new Backbone.Model({
+        id: 1
+      });
+
+      model.url = '/foo';
+
+      var oldXhr = model.save({}, {
+        success: success,
+        error: error
+      });
+
+      var xhr = model.save({}, {
+        success: success,
+        error: error
+      });
+
+      expect(oldXhr.abort).not.toHaveBeenCalled();
+      expect(xhr.abort).not.toHaveBeenCalled();
+      expect(model.$xhr['update']).toBe(oldXhr);
+      expect(success).not.toHaveBeenCalled();
+      expect(error).not.toHaveBeenCalled();
+    });
+
+    it('should trigger parallel update when a model is updated', function() {
+      Backbone.safeSync = false;
+      var success = jasmine.createSpy('success');
+      var error = jasmine.createSpy('error');
+
+      var model = new Backbone.Model({
+        id: 1
+      });
+
+      model.url = '/foo';
+
+      var oldXhr = model.save({}, {
+        success: success,
+        error: error
+      });
+
+      var xhr = model.save({}, {
+        success: success,
+        error: error
+      });
+
+      expect(oldXhr.abort).not.toHaveBeenCalled();
+      expect(xhr.abort).not.toHaveBeenCalled();
+      expect(model.$xhr).not.toBeDefined();
+      expect(success).not.toHaveBeenCalled();
+      expect(error).not.toHaveBeenCalled();
+    });
+
     it('should abort previous destroy when a model is destroyed', function() {
       var success = jasmine.createSpy('success');
       var error = jasmine.createSpy('error');
@@ -357,6 +543,64 @@ describe('Sync Spec', function() {
       expect(model.$xhr['delete']).toBe(null);
       expect(success).toHaveBeenCalled();
       expect(success.callCount).toBe(1);
+      expect(error).not.toHaveBeenCalled();
+    });
+
+    it('should skip destroy when a model is destroyed', function() {
+      Backbone.safeSync = 'skip';
+
+      var success = jasmine.createSpy('success');
+      var error = jasmine.createSpy('error');
+
+      var model = new Backbone.Model({
+        id: 1
+      });
+
+      model.url = '/foo';
+
+      var oldXhr = model.destroy({
+        success: success,
+        error: error
+      });
+
+      var xhr = model.destroy({
+        success: success,
+        error: error
+      });
+
+      expect(oldXhr.abort).not.toHaveBeenCalled();
+      expect(xhr.abort).not.toHaveBeenCalled();
+      expect(model.$xhr['delete']).toBe(oldXhr);
+      expect(success).not.toHaveBeenCalled();
+      expect(error).not.toHaveBeenCalled();
+    });
+
+    it('should trigger parallel destroy when a model is destroyed', function() {
+      Backbone.safeSync = false;
+
+      var success = jasmine.createSpy('success');
+      var error = jasmine.createSpy('error');
+
+      var model = new Backbone.Model({
+        id: 1
+      });
+
+      model.url = '/foo';
+
+      var oldXhr = model.destroy({
+        success: success,
+        error: error
+      });
+
+      var xhr = model.destroy({
+        success: success,
+        error: error
+      });
+
+      expect(oldXhr.abort).not.toHaveBeenCalled();
+      expect(xhr.abort).not.toHaveBeenCalled();
+      expect(model.$xhr).not.toBeDefined();
+      expect(success).not.toHaveBeenCalled();
       expect(error).not.toHaveBeenCalled();
     });
   });
@@ -413,6 +657,58 @@ describe('Sync Spec', function() {
       expect(collection.$xhr['read']).toBe(null);
       expect(success).toHaveBeenCalled();
       expect(success.callCount).toBe(1);
+      expect(error).not.toHaveBeenCalled();
+    });
+
+    it('should skip fetch when a collection is fetched', function() {
+      Backbone.safeSync = 'skip';
+
+      var success = jasmine.createSpy('success');
+      var error = jasmine.createSpy('error');
+
+      var collection = new Backbone.Collection();
+      collection.url = '/foo';
+
+      var oldXhr = collection.fetch({
+        success: success,
+        error: error
+      });
+
+      var xhr = collection.fetch({
+        success: success,
+        error: error
+      });
+
+      expect(oldXhr.abort).not.toHaveBeenCalled();
+      expect(xhr.abort).not.toHaveBeenCalled();
+      expect(collection.$xhr['read']).toBe(oldXhr);
+      expect(success).not.toHaveBeenCalled();
+      expect(error).not.toHaveBeenCalled();
+    });
+
+    it('should trigger parallel fetch when a collection is fetched', function() {
+      Backbone.safeSync = false;
+
+      var success = jasmine.createSpy('success');
+      var error = jasmine.createSpy('error');
+
+      var collection = new Backbone.Collection();
+      collection.url = '/foo';
+
+      var oldXhr = collection.fetch({
+        success: success,
+        error: error
+      });
+
+      var xhr = collection.fetch({
+        success: success,
+        error: error
+      });
+
+      expect(oldXhr.abort).not.toHaveBeenCalled();
+      expect(xhr.abort).not.toHaveBeenCalled();
+      expect(collection.$xhr).not.toBeDefined(oldXhr);
+      expect(success).not.toHaveBeenCalled();
       expect(error).not.toHaveBeenCalled();
     });
   });
