@@ -22,11 +22,13 @@
  * THE SOFTWARE.
  */
 
+var collectionKeys = _.keys(Backbone.Collection.prototype);
+
 Backbone.Collection = (function(Collection) {
 	return Collection.extend({
       constructor: function(models, options) {
-        if (Backbone.attachOptions) {
-          Backbone.$attach(this, options || {});
+        if (Backbone.attachOptions && options) {
+          Backbone.$attach(this, _.omit(options, collectionKeys));
         }
         Collection.apply(this, arguments);
       }

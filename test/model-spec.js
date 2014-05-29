@@ -42,6 +42,22 @@ describe('Model Spec', function() {
   	expect(model.foo).toBeDefined();
   });
 
+  it('should create a new model with options and do not override original values', function() {
+    var attributes = {
+      id: 1
+    };
+
+    var options = {
+      foo: 'bar',
+      parse: true
+    };
+
+    var model = new Backbone.Model(attributes, options);
+
+    expect(model.foo).toBeDefined();
+    expect(typeof model.parse).toBe('function');
+  });
+
   it('should create a new model without options if option is disabled', function() {
     Backbone.attachOptions = false;
 

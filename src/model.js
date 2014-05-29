@@ -22,11 +22,13 @@
  * THE SOFTWARE.
  */
 
+var modelKeys = _.keys(Backbone.Model.prototype);
+
 Backbone.Model = (function(Model) {
 	return Model.extend({
       constructor: function(attributes, options) {
-        if (Backbone.attachOptions) {
-          Backbone.$attach(this, options || {});
+        if (Backbone.attachOptions && options) {
+          Backbone.$attach(this, _.omit(options, modelKeys));
         }
         Model.apply(this, arguments);
       }

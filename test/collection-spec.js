@@ -42,6 +42,22 @@ describe('Collection Spec', function() {
     expect(collection.foo).toBeDefined();
   });
 
+  it('should create a new collection with options and do not override original functions', function() {
+    var models = [{
+      id: 1
+    }];
+
+    var options = {
+      foo: 'bar',
+      parse: true
+    };
+
+    var collection = new Backbone.Collection(models, options);
+
+    expect(collection.foo).toBeDefined();
+    expect(typeof collection.parse).toBe('function');
+  });
+
   it('should not create a new collection with options if option is disabled', function() {
     Backbone.attachOptions = false;
 
