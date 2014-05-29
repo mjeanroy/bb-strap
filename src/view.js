@@ -240,11 +240,12 @@ _.extend(Backbone.View.prototype, {
    * @return {Backbone.View} this.
    */
   $destroy: function() {
-    for (var i in this) {
-      if (_.has(this, i)) {
-        this[i] = null;
-      }
-    }
+    var iterator = function(val, key) {
+      this[key] = null;
+    };
+
+    _.each(this, iterator, this);
+
     return this;
   },
 
@@ -326,5 +327,5 @@ _.extend(Backbone.View.prototype, {
     }
 
     return this;
-  },
+  }
 });

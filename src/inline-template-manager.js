@@ -33,6 +33,7 @@ Backbone.InlineTemplateManager.prototype = {
    * Load a template, store result in cache and execute callback
    * when template has been fetched.
    * @param {string} id Id of template to load.
+   * @param {function} callback Callback to call with result of template.
    */
   $get: function(id, callback) {
     var html = id;
@@ -79,6 +80,8 @@ Backbone.InlineTemplateManager.prototype = {
    * Load template(s) and execute callback when template(s)
    * have been fetched.
    * @param {string|array} id Templates.
+   * @param {function} callback Callback to call when templates are loaded.
+   * @param {object=} context Callback context.
    */
   load: function(id, callback, context) {
     var fn = _.isArray(id) ? '$loads' : '$load';

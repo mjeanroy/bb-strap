@@ -142,12 +142,14 @@ Backbone.CompositeView = Backbone.View.extend({
     _.each(this.$subviews, this.$closeSubview, this);
 
     // Try to search for subviews attached to view object
-    for (var i in this) {
-      if (_.has(this, i) && this[i] instanceof Backbone.View) {
-        this[i].remove();
+    var iterator = function(val, i) {
+      if (val instanceof Backbone.View) {
+        val.remove();
         this[i] = null;
       }
-    }
+    };
+
+    _.each(this, iterator, this);
 
     return this;
   },
@@ -210,7 +212,7 @@ Backbone.CompositeView = Backbone.View.extend({
   /**
    * Append subview to current view.
    * @param {object} view Sub view to append.
-   * @param {string|object=} Element to append to, optional, by default view element is used.
+   * @param {string|object=} el Element to append to, optional, by default view element is used.
    * @return {Backbone.CompositeView} this.
    */
   append: function(view, el) {

@@ -32,6 +32,7 @@ _.extend(Backbone.DOMTemplateManager.prototype, Backbone.InlineTemplateManager.p
    * Load a template, store result in cache and execute callback
    * when template has been retrieved.
    * @param {string} id Id of template to load.
+   * @param {function} callback Callback to call with result of template.
    * @override
    */
   $get: function(id, callback) {
