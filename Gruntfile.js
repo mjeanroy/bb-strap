@@ -125,8 +125,8 @@ module.exports = function(grunt) {
         updateConfigs: [],
         commit: true,
         commitMessage: 'Release v%VERSION%',
-        commitFiles: ['package.json', 'bower.json'],
-        createTag: false,
+        commitFiles: ['package.json', 'bower.json', 'dist'],
+        createTag: true,
         tagName: 'v%VERSION%',
         tagMessage: 'Version %VERSION%',
         push: false
@@ -138,16 +138,30 @@ module.exports = function(grunt) {
         files: [
           {
             expand: true,
-            src: ['build/*'],
+            cwd: 'build/',
+            src: ['**'],
             dest: 'dist/'
           }
         ]
+      }
+    },
+
+    exec: {
+      dist: {
+        command: 'git add -f dist',
+        stdout: true
       }
     }
   });
 
   grunt.registerTask('test', [
     'karma'
+  ]);
+
+  grunt.registerTask('dist', [
+    'clean:dist',
+    'copy:dist',
+    'exec:dist'
   ]);
 
   // Default task(s).
@@ -163,8 +177,7 @@ module.exports = function(grunt) {
   grunt.registerTask('release', function(level) {
     var lvl = level || 'minor';
     grunt.task.run('build');
-    grunt.task.run('clean:dist');
-    grunt.task.run('copy:dist');
+    grunt.task.run('dist');
     grunt.task.run('bump:' + lvl);
   });
 
