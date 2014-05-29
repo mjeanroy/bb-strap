@@ -12,7 +12,10 @@ module.exports = function(grunt) {
 
     pkg: grunt.file.readJSON('package.json'),
 
-    clean: ['build/'],
+    clean: {
+      build: ['build/'],
+      dist: ['dist/']
+    },
 
     concat: {
       options: {
@@ -122,13 +125,25 @@ module.exports = function(grunt) {
         updateConfigs: [],
         commit: true,
         commitMessage: 'Release v%VERSION%',
-        commitFiles: ['package.json', 'bower.json', 'dist'],
-        createTag: true,
+        commitFiles: ['package.json', 'bower.json'],
+        createTag: false,
         tagName: 'v%VERSION%',
         tagMessage: 'Version %VERSION%',
         push: false
       }
-  },
+    },
+
+    copy: {
+      dist: {
+        files: [
+          {
+            expand: true,
+            src: ['build/*'],
+            dest: 'dist/'
+          }
+        ]
+      }
+    }
   });
 
   grunt.registerTask('test', [
@@ -137,7 +152,7 @@ module.exports = function(grunt) {
 
   // Default task(s).
   grunt.registerTask('build', [
-    'clean',
+    'clean:build',
     'jshint',
     'karma:continuous',
     'concat:dist',
@@ -148,6 +163,8 @@ module.exports = function(grunt) {
   grunt.registerTask('release', function(level) {
     var lvl = level || 'minor';
     grunt.task.run('build');
+    grunt.task.run('clean:dist');
+    grunt.task.run('copy:dist');
     grunt.task.run('bump:' + lvl);
   });
 
