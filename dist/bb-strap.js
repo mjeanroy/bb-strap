@@ -363,11 +363,12 @@ _.extend(Backbone.View.prototype, {
    * @return {Backbone.View} this.
    */
   $destroy: function() {
-    for (var i in this) {
-      if (_.has(this, i)) {
-        this[i] = null;
-      }
-    }
+    var iterator = function(val, key) {
+      this[key] = null;
+    };
+
+    _.each(this, iterator, this);
+
     return this;
   },
 
@@ -449,7 +450,7 @@ _.extend(Backbone.View.prototype, {
     }
 
     return this;
-  },
+  }
 });
 
 Backbone.Mediator = {
@@ -547,6 +548,7 @@ Backbone.InlineTemplateManager.prototype = {
    * Load a template, store result in cache and execute callback
    * when template has been fetched.
    * @param {string} id Id of template to load.
+   * @param {function} callback Callback to call with result of template.
    */
   $get: function(id, callback) {
     var html = id;
@@ -593,6 +595,8 @@ Backbone.InlineTemplateManager.prototype = {
    * Load template(s) and execute callback when template(s)
    * have been fetched.
    * @param {string|array} id Templates.
+   * @param {function} callback Callback to call when templates are loaded.
+   * @param {object=} context Callback context.
    */
   load: function(id, callback, context) {
     var fn = _.isArray(id) ? '$loads' : '$load';
@@ -612,6 +616,7 @@ _.extend(Backbone.DOMTemplateManager.prototype, Backbone.InlineTemplateManager.p
    * Load a template, store result in cache and execute callback
    * when template has been retrieved.
    * @param {string} id Id of template to load.
+   * @param {function} callback Callback to call with result of template.
    * @override
    */
   $get: function(id, callback) {
@@ -651,6 +656,7 @@ _.extend(Backbone.RemoteTemplateManager.prototype, Backbone.DOMTemplateManager.p
    * Load a template, store result in cache and execute callback
    * when template has been fetched.
    * @param {string} id Id of template to load.
+   * @param {function} callback Callback to call with result of template.
    * @override
    */
   $get: function(id, callback) {
@@ -882,12 +888,14 @@ Backbone.CompositeView = Backbone.View.extend({
     _.each(this.$subviews, this.$closeSubview, this);
 
     // Try to search for subviews attached to view object
-    for (var i in this) {
-      if (_.has(this, i) && this[i] instanceof Backbone.View) {
-        this[i].remove();
+    var iterator = function(val, i) {
+      if (val instanceof Backbone.View) {
+        val.remove();
         this[i] = null;
       }
-    }
+    };
+
+    _.each(this, iterator, this);
 
     return this;
   },
@@ -950,7 +958,7 @@ Backbone.CompositeView = Backbone.View.extend({
   /**
    * Append subview to current view.
    * @param {object} view Sub view to append.
-   * @param {string|object=} Element to append to, optional, by default view element is used.
+   * @param {string|object=} el Element to append to, optional, by default view element is used.
    * @return {Backbone.CompositeView} this.
    */
   append: function(view, el) {
