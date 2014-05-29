@@ -366,11 +366,14 @@ Backbone.CompositeView = Backbone.View.extend({
     this.trigger('render:start', this);
     this.preRender();
 
-    // HTML will be entirely redraw, so jQuery cache need to be cleared to avoid detached elements and memory leak/
+    // HTML will be entirely redraw, so jQuery cache need to be cleared to avoid detached elements and memory leak.
     this.$clear();
 
     // Subviews will have to be redrawed.
     this.$closeSubviews();
+
+    // Need to remove loader
+    this.$hideLoader();
 
     var html = this.toHTML.apply(this, arguments);
     this.$el.html(html);

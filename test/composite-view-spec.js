@@ -773,6 +773,7 @@ describe('Composite View Spec', function() {
 
     it('should populate view', function() {
       var view = new Backbone.CompositeView();
+      spyOn(view, '$hideLoader');
 
       var templates = 'foo';
 
@@ -784,7 +785,8 @@ describe('Composite View Spec', function() {
       expect(view.toHTML).toHaveBeenCalledWith(templates);
       expect(view.preRender).toHaveBeenCalled();
       expect(view.onRendered).toHaveBeenCalled();
-      expect(view.trigger).toHaveBeenCalledWith('render:end', view);
+      expect(view.$hideLoader).toHaveBeenCalled();
+      expect(view.onRendered).toHaveBeenCalled();
       expect(view.trigger).toHaveBeenCalledWith('render:start', view);
       expect(view.$el.html).toHaveBeenCalledWith('foo');
     });
