@@ -28,7 +28,7 @@ Backbone.Router = (function(Router) {
       Router.apply(this, arguments);
 
       // Trigger history
-      if (!Backbone.history.started) {
+      if (!Backbone.History.started) {
         var opts = options || {};
 
         var defaults = {

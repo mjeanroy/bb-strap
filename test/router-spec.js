@@ -25,7 +25,13 @@
 describe('Router Spec', function() {
 
   beforeEach(function() {
-    spyOn(Backbone.history, 'start');
+    spyOn(Backbone.history, 'start').andCallFake(function() {
+      Backbone.History.started = true;
+    });
+  });
+
+  afterEach(function() {
+    Backbone.History.started = false;
   });
 
   it('should start history navigation', function() {
@@ -50,7 +56,7 @@ describe('Router Spec', function() {
   });
 
   it('should not start history navigation if it is already started', function() {
-    Backbone.history.started = true;
+    Backbone.History.started = true;
 
     var router = new Backbone.Router({
       silent: true,
@@ -58,5 +64,18 @@ describe('Router Spec', function() {
     });
 
     expect(Backbone.history.start).not.toHaveBeenCalled();
+  });
+
+  it('should not start history navigation if it is started in initialize function', function() {
+    var CustomRouter = Backbone.Router.extend({
+      initialize: function() {
+        Backbone.history.start();
+      }
+    });
+
+    var router = new CustomRouter();
+
+    expect(Backbone.history.start).toHaveBeenCalled();
+    expect(Backbone.history.start.callCount).toBe(1);
   });
 });
