@@ -158,12 +158,15 @@ describe('Mediator Test Suite', function() {
       fn: callback2
     });
 
+    var oldChannels = Backbone.Mediator.$channels[channel];
+
     Backbone.Mediator.publish(channel, arg1, arg2);
 
     expect(callback1).toHaveBeenCalledWith(arg1, arg2);
     expect(callback2).toHaveBeenCalledWith(arg1, arg2);
     expect(Backbone.Mediator.$channels[channel].length).toBe(1);
     expect(Backbone.Mediator.$channels[channel][0].fn).toBe(callback2);
+    expect(Backbone.Mediator.$channels[channel]).toBe(oldChannels);
   });
 
   it('should unsubscribe all channels', function() {
@@ -205,15 +208,20 @@ describe('Mediator Test Suite', function() {
       fn: callback2
     });
 
+    var oldChannel1 = Backbone.Mediator.$channels[channel1];
+    var oldChannel2 = Backbone.Mediator.$channels[channel2];
+
     Backbone.Mediator.unsubscribe(channel1);
 
     expect(Backbone.Mediator.$channels).not.toEqual({});
     expect(Backbone.Mediator.$channels[channel1]).toBeDefined();
     expect(Backbone.Mediator.$channels[channel1]).toEqual([]);
+    expect(Backbone.Mediator.$channels[channel1]).toBe(oldChannel1);
 
     expect(Backbone.Mediator.$channels[channel2]).toBeDefined();
     expect(Backbone.Mediator.$channels[channel2].length).toBe(1);
     expect(Backbone.Mediator.$channels[channel2][0].fn).toBe(callback2);
+    expect(Backbone.Mediator.$channels[channel2]).toBe(oldChannel2);
   });
 
   it('should unsubscribe a given subscribtion on a given channel', function() {
@@ -231,12 +239,15 @@ describe('Mediator Test Suite', function() {
       fn: callback2
     });
 
+    var oldChannel = Backbone.Mediator.$channels[channel1];
+
     Backbone.Mediator.unsubscribe(channel1, callback2);
 
     expect(Backbone.Mediator.$channels).not.toEqual({});
     expect(Backbone.Mediator.$channels[channel1]).toBeDefined();
     expect(Backbone.Mediator.$channels[channel1].length).toBe(1);
     expect(Backbone.Mediator.$channels[channel1][0].fn).toBe(callback1);
+    expect(Backbone.Mediator.$channels[channel1]).toBe(oldChannel);
   });
 
   it('should unsubscribe a given subscribtion related to a given context on a given channel', function() {
@@ -257,6 +268,8 @@ describe('Mediator Test Suite', function() {
       ctx: ctx2
     });
 
+    var oldChannels = Backbone.Mediator.$channels[channel1];
+
     Backbone.Mediator.unsubscribe(channel1, callback, ctx2);
 
     expect(Backbone.Mediator.$channels).not.toEqual({});
@@ -264,6 +277,7 @@ describe('Mediator Test Suite', function() {
     expect(Backbone.Mediator.$channels[channel1].length).toBe(1);
     expect(Backbone.Mediator.$channels[channel1][0].fn).toBe(callback);
     expect(Backbone.Mediator.$channels[channel1][0].ctx).toBe(ctx1);
+    expect(Backbone.Mediator.$channels[channel1]).toBe(oldChannels);
   });
 
   it('should have publish / subscribe shortcuts', function() {
