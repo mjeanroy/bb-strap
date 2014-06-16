@@ -501,10 +501,17 @@ Backbone.Mediator = {
 
     if (subscriptions) {
       var args = [].slice.call(arguments, 1);
-      Backbone.Mediator.$channels[channel] = _.reject(subscriptions, function(subscription) {
+
+      // Use standard loop to keep same array instance
+      for (var i = 0, size = subscriptions.length; i < size; ++i) {
+        var subscription = subscriptions[i];
         subscription.fn.apply(subscription.ctx, args);
-        return subscription.once;
-      });
+        if (subscription.once) {
+          subscriptions.splice(i, 1);
+          i--;
+          size--;
+        }
+      }
     }
   },
 
@@ -524,14 +531,20 @@ Backbone.Mediator = {
     var channels = Backbone.Mediator.$channels;
     var subscriptions = channels[channel];
     if (subscriptions) {
-      var newSubscriptions = [];
+      var size = subscriptions.length;
       if (nbArgs > 1) {
-        newSubscriptions = _.reject(subscriptions, function(subscription) {
-          return subscription.fn === fn && (!context || subscription.ctx === context);
-        });
+        // Use standard loop to keep same array instance
+        for (var i = 0; i < size; ++i) {
+          var subscription = subscriptions[i];
+          if (subscription.fn === fn && (!context || subscription.ctx === context)) {
+            subscriptions.splice(i, 1);
+            i--;
+            size--;
+          }
+        }
+      } else {
+        subscriptions.splice(0, size);
       }
-
-      Backbone.Mediator.$channels[channel] = newSubscriptions;
     }
   }
 };
@@ -759,7 +772,7 @@ Backbone.Router = (function(Router) {
       Router.apply(this, arguments);
 
       // Trigger history
-      if (!Backbone.history.started) {
+      if (!Backbone.History.started) {
         var opts = options || {};
 
         var defaults = {
