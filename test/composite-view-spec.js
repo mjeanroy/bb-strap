@@ -424,6 +424,26 @@ describe('Composite View Spec', function() {
       expect(subview2.foo).toBe('bar');
     });
 
+    it('should read a subview from DOM with clone of options', function() {
+      var el = '' +
+        '<div>' +
+        '  <div class="subview">Subview 1</div>' +
+        '  <div class="subview">Subview 1</div>' +
+        '</div>';
+
+      var $el = $(el);
+
+      this.view.setElement($el);
+
+      var options = {
+        foo: 'bar'
+      };
+
+      this.view.$readSubview('.subview', Backbone.CompositeView, options);
+
+      expect(options.el).not.toBeDefined();
+    });
+
     it('should read a subview from DOM with options as a function', function() {
       var el = '' +
         '<div>' +
@@ -463,6 +483,32 @@ describe('Composite View Spec', function() {
       expect(viewOptions.callCount).toBe(2);
       expect(viewOptions).toHaveBeenCalledWith(0, jasmine.any(Object));
       expect(viewOptions).toHaveBeenCalledWith(1, jasmine.any(Object));
+    });
+
+    it('should read a subview from DOM with options as a function and clone options', function() {
+      var el = '' +
+        '<div>' +
+        '  <div class="subview">Subview 1</div>' +
+        '  <div class="subview">Subview 1</div>' +
+        '</div>';
+
+      var $el = $(el);
+
+      this.view.setElement($el);
+
+      var defaults = {
+        foo: 'bar'
+      };
+
+      var viewOptions = jasmine.createSpy('options').andCallFake(function(idx) {
+        return _.defaults({
+          idx: idx
+        }, defaults);
+      });
+
+      var result = this.view.$readSubview('.subview', Backbone.CompositeView, viewOptions);
+
+      expect(defaults.idx).not.toBeDefined();
     });
 
     it('should append subview', function() {

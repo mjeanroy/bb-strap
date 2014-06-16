@@ -196,10 +196,11 @@ Backbone.CompositeView = Backbone.View.extend({
     var subviews = [];
 
     var iterator = function($elem, index) {
-      var viewOptions = options || {};
-      if (_.isFunction(viewOptions)) {
-        viewOptions = viewOptions.call(this, index, $elem);
-      }
+      var viewOptions = _.isFunction(options) ?
+        options.call(this, index, $elem) :
+        options;
+
+      viewOptions = _.clone(viewOptions || {});
 
       if (!viewOptions.el) {
         viewOptions.el = $elem;
