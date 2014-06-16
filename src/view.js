@@ -44,6 +44,8 @@ Backbone.View = (function(View) {
     });
 })(Backbone.View);
 
+var $VIEW_DELEGATES = Backbone.View.prototype.delegateEvents;
+
 _.extend(Backbone.View.prototype, {
 
   /**
@@ -327,5 +329,55 @@ _.extend(Backbone.View.prototype, {
     }
 
     return this;
-  }
+  },
+
+  /**
+   * Override original delegate methods to avoid 'preventDefault' boilerplate.
+   * @param {*=} events Events to bind to.
+   * @return {Backbone.View} this.
+   * @override
+   */
+  delegateEvents: function(events) {
+    var $super = $VIEW_DELEGATES;
+
+    // If events are set as first parameter, do not override anything
+    if (events) {
+      return $super.call(this, events);
+    }
+
+    events = _.result(this, 'events');
+
+    if (events) {
+      // Override original events objects
+      var customEvents = {};
+      _.each(events, function(event, eventName) {
+        var fn = _.isObject(event) ? event.fn : event;
+        var method = _.isString(fn) ? this[fn] : fn;
+
+        var obj = _.isObject(event) ? event : {};
+        var settings = _.defaults(obj, Backbone.$events);
+
+        customEvents[eventName] = function(e) {
+          if (_.result(settings, 'preventDefault')) {
+            e.preventDefault();
+          }
+
+          if (_.result(settings, 'stopPropagation')) {
+            e.stopPropagation();
+          }
+
+          if (_.result(settings, 'stopImmediatePropagation')) {
+            e.stopImmediatePropagation();
+          }
+
+          method.apply(this, arguments);
+        };
+      }, this);
+
+      // Call original function with new custom events
+      $super.call(this, customEvents);
+    }
+
+    return this;
+  },
 });

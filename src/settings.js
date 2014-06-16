@@ -36,6 +36,13 @@ Backbone.defaultTemplateManager = 'remote';
 // attach before initialize function
 Backbone.attachOptions = true;
 
+// Default settings for delegated events
+Backbone.$events = {
+  preventDefault: true,
+  stopPropagation: false,
+  stopImmediatePropagation: false
+};
+
 // Default template compilation function
 Backbone.$compile = function(template) {
   return _.isFunction(template) ?

@@ -404,4 +404,58 @@ describe('View Spec', function() {
       expect($el.find('#first-name').text()).toBe('bar');
     });
   });
+
+  describe('View Events', function() {
+    beforeEach(function() {
+      this.event = function(eventName) {
+        var evt = jQuery.Event(eventName);
+        spyOn(evt, 'preventDefault');
+        spyOn(evt, 'stopPropagation');
+        spyOn(evt, 'stopImmediatePropagation');
+        return evt;
+      };
+
+      this.click = this.event('click');
+      this.submit = this.event('submit');
+
+      this.spy1 = jasmine.createSpy('spy1');
+      this.spy2 = jasmine.createSpy('spy2');
+
+      var CustomView = Backbone.View.extend({
+        events: {
+          'click': 'spy1',
+          'submit': {
+            stopPropagation: true,
+            stopImmediatePropagation: true,
+            fn: 'spy1'
+          },
+          'keyup': 'spy2'
+        },
+
+        spy1: this.spy1,
+        spy2: this.spy2
+      });
+
+      this.view = new CustomView();
+      this.$el = this.view.$el;
+    });
+
+    it('should prevent default event behavior', function() {
+      this.$el.trigger(this.click);
+
+      expect(this.spy1).toHaveBeenCalled();
+      expect(this.click.preventDefault).toHaveBeenCalled();
+      expect(this.click.stopPropagation).not.toHaveBeenCalled();
+      expect(this.click.stopImmediatePropagation).not.toHaveBeenCalled();
+    });
+
+    it('should stop propagation and prevent default event behavior', function() {
+      this.$el.trigger(this.submit);
+
+      expect(this.spy1).toHaveBeenCalled();
+      expect(this.submit.preventDefault).toHaveBeenCalled();
+      expect(this.submit.stopPropagation).toHaveBeenCalled();
+      expect(this.submit.stopImmediatePropagation).toHaveBeenCalled();
+    });
+  });
 });
